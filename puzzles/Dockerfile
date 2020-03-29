@@ -11,11 +11,7 @@ RUN apk add --update-cache \
 
 WORKDIR /code/
 
-ENV DISPLAY=host.docker.internal:0.0
-
 COPY . .
-
-RUN ls
 
 RUN ./mkfiles.pl && \
     ./mkauto.sh && \
@@ -23,10 +19,8 @@ RUN ./mkfiles.pl && \
     make slantsolver &&\
     mv ./slantsolver ./slant_puzzle
 
-
 FROM alpine:3.11
 COPY --from=0 /code/slant_puzzle /slant_puzzle
 
 CMD /slant_puzzle
-
 
