@@ -1,0 +1,43 @@
+
+
+.cell_free {
+    width: 15px;
+    height: 15px;
+    border: 1px;
+
+    border: 2px;
+    border-color: black;
+    border-style: solid;
+    background-color: green;
+    margin: 1px;
+}
+
+.cell_not_free {
+    width: 15px;
+    border: 2px;
+    border-color: black;
+    border-style: solid;
+    height: 15px;
+    background-color: grey;
+    margin: 1px;
+}
+
+.line {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+}
+
+.content{
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    display: inline-block;
+
+}
+
+
+.main {
+    text-align: center;
+    background-color: grey;
+}

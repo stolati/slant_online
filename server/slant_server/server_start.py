@@ -1,18 +1,18 @@
 #!/usr/bin/env python3.6
-
-
 import random
 from collections import namedtuple
 from flask import Flask, request
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
+import config
 
 import puzzle
 
+# TODO: have logging system
+
 app = Flask(__name__)
 
-client = MongoClient("mongodb://localhost:27017")
-#27017
+client = MongoClient(config.MONGO_URL)
 db = client.test_database
 
 random.seed()
@@ -28,11 +28,11 @@ class ZonePath(namedtuple('ZonePath', ['x', 'y'])):
     @classmethod
     def from_str(cls, s):
         # TODO: use regex to check if this is valid before hand
-        x, y = s.split(':')
+        x, y = s.split('-')
         return cls(x, y)
 
     def to_str(self):
-        return f'{self.x}:{self.y}'
+        return f'{self.x}-{self.y}'
 
     @classmethod
     def clean(cls, s):
@@ -47,14 +47,16 @@ def random_zone_path():
 
 def get_or_create_zone_path(zone_path):
     zone_path = ZonePath.clean(zone_path)
-    print(zone_path)
 
     cur_zone_obj = db.zones.find_one({'zone_path': zone_path})
 
     if cur_zone_obj is not None:
         return cur_zone_obj
 
-    new_zone = puzzle.get_puzzle(zone_path)
+    new_zone = puzzle.get_puzzle(zone_path,
+                                 width=config.PUZZLE_WIDTH,
+                                 height=config.PUZZLE_HEIGHT,
+        )
     new_zone['zone_path'] = zone_path
     new_zone['solved'] = False
 
@@ -64,7 +66,6 @@ def get_or_create_zone_path(zone_path):
 
 
 def zone_to_apiget(zone_obj):
-    print(zone_obj)
     return {
         'zone_path': zone_obj['zone_path'],
         'problem': zone_obj['problem'],
@@ -102,7 +103,6 @@ def api_zones_post_by_path(zone_path):
     zone_path_obj = get_or_create_zone_path(zone_path)
 
     request_data = request.get_json()
-    print(request_data)
 
     if zone_path_obj['solved']:
         return {'ko': 'already_solved'}
@@ -119,7 +119,7 @@ def api_zones_post_by_path(zone_path):
 
 @app.route("/api/zones")
 def api_zones_all():
-    content = [['0'] * 100 for _ in range(100)]
+    content = [['0'] * config.MAP_WIDTH for _ in range(config.MAP_HEIGHT)]
 
     for zone in db.zones.find():
         zone_path = zone.get('zone_path')
@@ -127,15 +127,13 @@ def api_zones_all():
 
         if solved and zone_path:
             zp = ZonePath.from_str(zone_path)
-            print('putting solved for : ' + str(zp))
             content[int(zp.x)][int(zp.y)] = 'X'
 
     content_str = '\n'.join([''.join(row) for row in content])
-    print(content_str)
 
     return {
-        'width': 100,
-        'height': 100,
+        'width': config.MAP_WIDTH,
+        'height': config.MAP_HEIGHT,
         'content': content_str,
     }
 
@@ -157,4 +155,5 @@ def start_prod():
 
 # toto
 if __name__ == '__main__':
+    # TODO: have env variable to set prod/dev
     start_dev()

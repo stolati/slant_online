@@ -22,13 +22,21 @@ dev_docker_build:
 	docker build -t $(server_image) .
 
 dev_start: dev_docker_build
-	docker run \
+	../bin/forever docker run --rm \
 		--publish 5000:5000 \
-		--volume $(ref_dir)/slant_online/server/slant_server:/srv/slant_server \
+		--volume $(ref_dir)/slant_server:/srv/slant_server \
 		$(server_image)
+
+dev_mongo_server:
+	docker run --rm \
+		--publish 27017:27017 \
+		mongo:4.2-bionic
 
 dev_local_start: ./virtualenv
 	PYTHONDONTWRITEBYTECODE=1 $(p3) ./slant_server/server_start.py
+
+dev_local_start_loop:
+	while sleep 1 ; do $(MAKE) dev_local_start ; done
 
 prune:
 	rm -rf ./virtualenv

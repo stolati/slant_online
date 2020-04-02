@@ -1,5 +1,5 @@
 *.o
-/Makefile*
+/puzzles/Makefile
 /blackbox
 /bridges
 /cube

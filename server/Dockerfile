@@ -11,5 +11,9 @@ ENV FLASK_ENV=development
 
 COPY slant_server ./slant_server
 
-CMD python3.6 ./slant_server/server_start.py
+EXPOSE 5000/udp
+
+RUN ls *
+
+CMD python3.6 /srv/slant_server/server_start.py
 

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+#while true ; do
+#    $cmd & pid=$!
+#    PID_LIST+=" $pid";
+#
+#    trap "kill $PID_LIST" SIGINT
+# done
+
+while sleep 1 ; do
+    "$@"
+done
+
+

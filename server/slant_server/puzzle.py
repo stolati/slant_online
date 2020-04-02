@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import random
 import json
-import subprocess
+import requests
+import urllib.parse
+
+import config
 
 DIFFICULTY_HARD = 'HARD'
 DIFFICULTY_EASY = 'EASY'
@@ -35,21 +38,15 @@ def extract_problem(problem):
 
 def get_puzzle(seed=None, width=12, height=12, difficulty=DIFFICULTY_HARD):
     seed = seed or str(random.random())
-    difficulty_char = {
-        DIFFICULTY_HARD: 'h',
-        DIFFICULTY_EASY: 'e',
-    }[difficulty]
 
-    param = str(width) + 'x' + str(height) + 'd' + difficulty_char
+    response = requests.get(config.PUZZLE_URL + '/puzzle', params={
+        'width': width,
+        'height': height,
+        'difficulty': difficulty,
+        'seed': seed,
+    })
 
-    output = subprocess.check_output([
-        'docker',
-        'run',
-        'slant_puzzle:latest',
-        '/slant_puzzle',
-        param,
-        seed,
-    ])
+    output = response.content
 
     output = output.decode('utf-8')
 

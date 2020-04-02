@@ -1,0 +1,11 @@
+svg {
+    pointer-events: none;
+}
+
+.small {
+
+    font: 4px "Lucida Console", Monaco, monospace;
+
+    fill: black;
+
+}
