@@ -22,17 +22,16 @@ const positionToZoneId = (x, y) => `${x}-${y}`;
 
 export function MainMap() {
 
-  const {content} = useSelector(selectMainMap);
-
   const dispatch = useDispatch();
 
    useEffect(()=>{
         dispatch(fetchMainMap());
-   }, []);
+   }, [dispatch]);
 
+  const {content} = useSelector(selectMainMap);
 
    const cellFct = (isfree, x, y) =>
-       <Link to={"/zone/" + positionToZoneId(x, y)} key={x}>
+       <Link to={"/zone/" + positionToZoneId(y, x)} key={x}>
            <div className={isfree ? styles.cell_free: styles.cell_not_free}>
 
            </div>

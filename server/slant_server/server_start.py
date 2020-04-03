@@ -105,7 +105,7 @@ def api_zones_post_by_path(zone_path):
     request_data = request.get_json()
 
     if zone_path_obj['solved']:
-        return {'ko': 'already_solved'}
+        return {'ok': 'already_solved'}
 
     is_solution_correct = zone_path_obj['solution'] == request_data.get('solution')
     if not is_solution_correct:

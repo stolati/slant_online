@@ -1,13 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
-
-
-//const DEFAULT_ZONE = {
-//        zone_path: null,
-//        problem: null,
-//        width: 0,
-//        height: 0,
-//}
+import { range } from '../../utils';
 
 // TODO : change zoneId to zonePath
 
@@ -21,24 +14,80 @@ export const fetchZone = createAsyncThunk(
     }
 )
 
+export const pushAnswer = createAsyncThunk(
+    'zone:pushAnswer:status',
+    async (data, thunkAPI) => {
+        const {zoneId, solution} = data;
+
+        let payload = {
+            solution: solution.map(l => l.join(''))
+        };
+        const response = await axios.post(`/api/zones/${zoneId}`, payload);
+
+        let isOk = response.data.ok !== undefined;
+        return {isOk, zoneId};
+    }
+)
+
 
 export const slice = createSlice({
   name: 'zone',
   initialState: {},
   reducers: {
+    leftClick: (state, action) => {
+        let {x, y, zoneId} = action.payload;
+        let zone = state[zoneId];
 
+        let rotateClick = (e) => ({
+                ' ': '\\',
+                '\\': '/',
+                '/': ' ',
+            }[e]);
 
+        zone.solution[y][x] = rotateClick(zone.solution[y][x]);
+    },
+    rightClick: (state, action) => {
+        let {x, y, zoneId} = action.payload;
+        let zone = state[zoneId];
+
+        let rotateClick = (e) => ({
+                ' ': '/',
+                '/': '\\',
+                '\\': ' ',
+            }[e]);
+
+        zone.solution[y][x] = rotateClick(zone.solution[y][x]);
+    }
   },
   extraReducers: {
     [fetchZone.fulfilled]: (state, action) => {
-        state[action.payload.zone_path] = {
-            ...action.payload
+        let {height, width, problem, zone_path} = action.payload;
+        let solved = false;
+
+        let newZone = {height, width, problem, solved, zone_path};
+
+        if(!newZone.solution){
+            newZone.solution =
+                range(newZone.height).map((_, y) =>
+                    range(newZone.width).map((_, x) =>
+                        ' '
+                    )
+                );
         }
+
+        state[zone_path] = newZone;
+
     },
+    [pushAnswer.fulfilled]: (state, action) => {
+        console.log('pushAnswer.fulfilled', state, action);
+        let {isOk, zoneId} = action.payload;
+
+        state[zoneId].solved = isOk;
+    }
   },
 });
 
-export const { } = slice.actions;
+export const { leftClick, rightClick } = slice.actions;
 
 
 export const selectZone = zoneId => state => state.zone[zoneId];

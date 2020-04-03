@@ -1,11 +1,50 @@
 svg {
     pointer-events: none;
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 .small {
-
     font: 4px "Lucida Console", Monaco, monospace;
 
     fill: black;
+}
 
+.line {
+    stroke: #DCDCDC;
+    stroke-width:1;
+}
+
+.rectFloor {
+   pointer-events: none;
+   stroke:black;
+   fill:grey;
+}
+
+.rectBackground {
+    //stroke:black;
+    fill: grey;
+}
+
+.wrappingDiv {
+    margin: 5%;
+
+    width: 90%;
+    height: 90%;
+
+    border: 0;
+    padding: 0;
+}
+
+.div_succeed {
+  animation-duration: 5s;
+  animation-name: myanimation;
+}
+
+@keyframes myanimation {
+    0% { opacity: 0; filter: blur(1px); }
+    50% { opacity: 1; }
+
+    100% { filter: blur(20px);  }
 }
