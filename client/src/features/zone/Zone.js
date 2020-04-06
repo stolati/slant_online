@@ -97,19 +97,11 @@ export function Zone(props) {
           dispatch(rightClick({...posAbs, zoneId}))
       )
 
-   }
-
-
-   let onClickEvent = (e) => {
-      onMouseClickEvent(e, true);
-   }
-
-
-   let onContextMenuEvent = (e) => {
-      onMouseClickEvent(e, false);
       return false;
    }
 
+   let onClickEvent = (e) => onMouseClickEvent(e, true);
+   let onContextMenuEvent = (e) => onMouseClickEvent(e, false);
 
     let divClassNames = [styles.wrappingDiv];
 
@@ -117,7 +109,7 @@ export function Zone(props) {
         divClassNames.push(styles.div_succeed);
         setTimeout(
             ()=>props.history.push('/main_map')
-        ,5000);
+        ,4000);
     }
 
     divClassNames = divClassNames.join(' ')
@@ -202,7 +194,7 @@ export function Zone(props) {
                                 return null;
                           }
 
-                          return <text x={(x*M)+B-(CS/2)+1-0.25} y={(y*M)+B+(CS/2)-1+.5} className={styles.small} key={pos}>
+                          return <text x={(x*M)+B-(CS/2)+1-0.25} y={(y*M)+B+(CS/2)-1+.5} className={styles.small} key={pos} draggable="false">
                               {problem[y][x]}
                           </text>;
 
