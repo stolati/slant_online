@@ -5,16 +5,21 @@ svg {
     display: block;
 }
 
-.small {
+.small_text {
     font: 4px "Lucida Console", Monaco, monospace;
 
-    fill: black;
+    //fill: black;
 
 
 }
 
 .line {
     stroke: #DCDCDC;
+    stroke-width:1;
+}
+
+.lineError {
+    stroke: #FF0000;
     stroke-width:1;
 }
 
