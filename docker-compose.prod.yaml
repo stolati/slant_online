@@ -1,0 +1,30 @@
+version: "3"
+services:
+  puzzle:
+    image: slant_puzzle:prod
+    build:
+      context: ./puzzles
+      dockerfile: prod.Dockerfile
+    ports:
+      - "5001:5001"
+  client:
+    build:
+      context: ./client
+      dockerfile: prod.Dockerfile
+    image: slant_client:prod
+    ports:
+      - "3000:3000"
+  server:
+    image: slant_server:prod
+    build:
+      context: ./server
+      dockerfile: prod.Dockerfile
+    ports:
+      - "5000:5000"
+  nginx:
+      image: slant_nginx:prod
+      build:
+        context: ./deployment
+        dockerfile: nginx.prod.Dockerfile
+      ports:
+        - "80:80"

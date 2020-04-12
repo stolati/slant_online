@@ -2,7 +2,6 @@
   "name": "slant-online",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://host.docker.internal:5000",
   "dependencies": {
     "@reduxjs/toolkit": "^1.3.2",
     "@testing-library/jest-dom": "^4.2.4",

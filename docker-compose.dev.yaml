@@ -1,0 +1,37 @@
+version: "3"
+services:
+  puzzle:
+    image: slant_puzzle:latest
+    build:
+      context: ./puzzles
+      dockerfile: dev.Dockerfile
+    ports:
+      - "5001:5001"
+  client:
+    build:
+      context: ./client
+      dockerfile: dev.Dockerfile
+    image: slant_client:latest
+    volumes:
+      - ./client/src:/srv/src
+      - ./client/public:/srv/public
+    ports:
+      - "3000:3000"
+    # Needed for the dev environment to starts
+    stdin_open: true
+  server:
+    image: slant_server:latest
+    build:
+      context: ./server
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./server/slant_server:/srv/slant_server
+    ports:
+      - "5000:5000"
+  nginx:
+    image: slant_nginx:dev
+    build:
+      context: ./deployment
+      dockerfile: nginx.prod.Dockerfile
+    ports:
+      - "80:80"

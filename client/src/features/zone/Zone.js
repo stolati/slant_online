@@ -142,20 +142,6 @@ let getLoopSolution = (solution) => {
             ].filter(e=>e.length !== 0);
         }
 
-
-
-
-//        return [
-//            (v1 === '\\' && v5 === '\\') ? v1p : null,
-//            ((v2 === '/' && v5 === '\\') || (v2 === '\\' && v5 === '/') ) ? v2p : null,
-//            (v3 === '/' && v5 === '/') ? v3p : null,
-//            ((v4 === '/' && v5 === '\\') || (v4 === '\\' && v5 === '/')) ? v4p : null,
-//            false ? v5p : null,
-//            ((v6 === '/' && v5 === '\\') || (v6 === '\\' && v5 === '/')) ? v6p : null,
-//            (v7 === '/' && v5 === '/') ? v7p : null,
-//            ((v8 === '/' && v5 === '\\') || (v8 === '\\' && v5 === '/')) ? v8p : null,
-//            (v9 === '\\' && v5 === '\\') ? v9p : null,
-//        ].filter(e => e !== null)
     }
 
     let processElem = (x, y)=>{
@@ -182,7 +168,6 @@ let getLoopSolution = (solution) => {
    solution.forEach((line, y) => {
       line.forEach((_, x) => processElem(x, y))
    });
-
 
    return res;
 
@@ -212,17 +197,12 @@ export function Zone(props) {
 
    let loopSolution = getLoopSolution(solution);
 
-   // TODO : Here we should check for errors
-   // There are : - loops and numbers
-   // Then when getting the result, we should have an animation saying it's good.
-
    if(isFull){
-        console.log("is full");
         dispatch(pushAnswer({zoneId, solution}));
    }
 
    const B = 10; // Border every sides
-   const M = 10; // View box multiplicator
+   const M = 10; // View box multiplication
    const CS = 4; // circle size
 
    let viewBoxWidth =  ((width)*M)+B+B;

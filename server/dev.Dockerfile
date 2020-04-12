@@ -8,6 +8,7 @@ RUN pip install -r requirements.txt
 
 ENV FLASK_APP=slant_server/main.py
 ENV FLASK_ENV=development
+ENV ENVIRONMENT=DEV
 
 COPY slant_server ./slant_server
 

@@ -44,9 +44,12 @@ def start_dev():
 def start_prod():
     app.run(
         host="0.0.0.0",
-        port="80",
+        port="5001",
         debug=False
     )
 
 if __name__ == '__main__':
-    start_dev()
+    if os.getenv("ENVIRONMENT") == 'DEV':
+        start_dev()
+    else:
+        start_prod()

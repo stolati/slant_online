@@ -2,9 +2,10 @@
 import random
 from collections import namedtuple
 from flask import Flask, request
-from flask_pymongo import PyMongo
-from pymongo import MongoClient
 import config
+from tinydb import TinyDB, Query
+from tinydb import operations
+import os
 
 import puzzle
 
@@ -12,13 +13,11 @@ import puzzle
 
 app = Flask(__name__)
 
-client = MongoClient(config.MONGO_URL)
-db = client.test_database
+db = TinyDB('./db.json')
 
 random.seed()
 
-
-@app.route('/status')
+@app.route('/api/status')
 def status():
     return {"status": "running", "it": "ok"}
 
@@ -44,11 +43,36 @@ def random_zone_path():
                   random.randint(0, 100))
 
 
+class DbQueries(object):
+    zone_table = db.table("zones")
+    Zone = Query()
+
+    @classmethod
+    def find_by_zone_path_or_null(klass, zone_path):
+        Zone = Query()
+        res = klass.zone_table.search(Zone.zone_path == zone_path)
+        if res:
+            return res[0]
+        return None
+
+    @classmethod
+    def insert_new_zone(klass, new_zone):
+        klass.zone_table.insert(new_zone)
+
+    @classmethod
+    def update_solved_true_by_zone_path(klass, zone_path):
+        Zone = Query()
+        klass.zone_table.update(operations.set('solved', True), Zone.zone_path == zone_path)
+
+    @classmethod
+    def all_zones_iter(klass):
+        return klass.zone_table.all()
+
 
 def get_or_create_zone_path(zone_path):
     zone_path = ZonePath.clean(zone_path)
 
-    cur_zone_obj = db.zones.find_one({'zone_path': zone_path})
+    cur_zone_obj = DbQueries.find_by_zone_path_or_null(zone_path)
 
     if cur_zone_obj is not None:
         return cur_zone_obj
@@ -60,12 +84,13 @@ def get_or_create_zone_path(zone_path):
     new_zone['zone_path'] = zone_path
     new_zone['solved'] = False
 
-    zone_inserted_id = db.zones.insert_one(new_zone).inserted_id
+    DbQueries.insert_new_zone(new_zone)
 
-    return db.zones.find_one({'zone_path': zone_path})
+    return DbQueries.find_by_zone_path_or_null(zone_path)
 
 
 def zone_to_apiget(zone_obj):
+    print(zone_obj)
     return {
         'zone_path': zone_obj['zone_path'],
         'problem': zone_obj['problem'],
@@ -112,7 +137,8 @@ def api_zones_post_by_path(zone_path):
         return {'ko': 'not right solution'}
 
     zone_path_obj['solved'] = True
-    db.zones.update({"_id": zone_path_obj['_id']}, {"$set": {"solved": True}})
+
+    DbQueries.update_solved_true_by_zone_path(zone_path)
 
     return {'ok':'ok'}
 
@@ -121,7 +147,9 @@ def api_zones_post_by_path(zone_path):
 def api_zones_all():
     content = [['0'] * config.MAP_WIDTH for _ in range(config.MAP_HEIGHT)]
 
-    for zone in db.zones.find():
+
+    # HERE
+    for zone in DbQueries.all_zones_iter():
         zone_path = zone.get('zone_path')
         solved = zone.get('solved', False)
 
@@ -137,7 +165,6 @@ def api_zones_all():
         'content': content_str,
     }
 
-
 def start_dev():
     app.run(
         host="0.0.0.0",
@@ -149,11 +176,13 @@ def start_dev():
 def start_prod():
     app.run(
         host="0.0.0.0",
-        port="80",
+        port="5000",
         debug=False
     )
 
 # toto
 if __name__ == '__main__':
-    # TODO: have env variable to set prod/dev
-    start_dev()
+    if os.getenv("ENVIRONMENT") == 'DEV':
+        start_dev()
+    else:
+        start_prod()
