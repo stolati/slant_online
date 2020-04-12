@@ -19,13 +19,27 @@ const BASE_CONFIG = {
    CIRCLE_SIZE: 4, // circle size
 }
 
+//const io = require('socket.io-client');
+//const socket = io('http://localhost:3011');
 
+const socket = new WebSocket(`ws://${window.location.host}/ws`);
+
+
+socket.onopen = () => {
+        // on connecting, do nothing but log it to the console
+        console.log('connected')
+        }
+//
+//ws.onmessage = (e) => {
+//    console.log("Received : ", e);
+//};
 
 export function Zone(props) {
    const dispatch = useDispatch();
    let {zoneId} = useParams();
    const content = useSelector(selectZone(zoneId));
    const contentPresent = !!content;
+//   const [wsConnected, setWsConnected] = useState(false);
 
    useEffect(()=>{
         if(!contentPresent){
@@ -33,9 +47,17 @@ export function Zone(props) {
         }
    }, [zoneId, dispatch, contentPresent]);
 
+    useEffect(() => {
+        socket.onmessage = (e) => {
+            console.log(JSON.parse(e.data));
+        };
+    }, []);
+
+
    if(!content){
         return <div>Empty for now</div>;
    }
+
 
    let {height, width, problem, solution, solved} = content;
 
@@ -109,12 +131,18 @@ export function Zone(props) {
 
     divClassNames = divClassNames.join(' ')
 
+    let onMouseMove = (e) => {
+        const toSend = {x: e.screenX, y: e.screenY};
+        socket.send(JSON.stringify(toSend));
+    }
+
 
   return (
     <div >
         Zone {"" + zoneId} here
 
-    <div className={divClassNames} onClick={onClickEvent} onContextMenu={onContextMenuEvent}>
+    <div className={divClassNames} onClick={onClickEvent} onContextMenu={onContextMenuEvent}
+        onMouseMove={onMouseMove} >
         <svg viewBox={viewBox} >
 
              <rect x="0" y="0" width={viewBoxWidth} height={viewBoxHeight} className={styles.rectBackground} />

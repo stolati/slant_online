@@ -19,6 +19,15 @@ services:
       - "3000:3000"
     # Needed for the dev environment to starts
     stdin_open: true
+  ws_server:
+    image: slant_ws:latest
+    build:
+      context: ./ws_server
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./ws_server/ws_server:/srv/ws_server
+    ports:
+      - "8080:8080"
   server:
     image: slant_server:latest
     build:
