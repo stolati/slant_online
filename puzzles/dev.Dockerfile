@@ -13,8 +13,13 @@ WORKDIR /code/
 
 COPY ./from_simon .
 
-RUN ./mkfiles.pl && \
-    ./mkauto.sh && \
+#RUN ./mkfiles.pl && \
+#    ./mkauto.sh && \
+#    ./configure && \
+#    make slantsolver &&\
+#    mv ./slantsolver ./slant_puzzle
+
+RUN ./mkauto.sh && \
     ./configure && \
     make slantsolver &&\
     mv ./slantsolver ./slant_puzzle
