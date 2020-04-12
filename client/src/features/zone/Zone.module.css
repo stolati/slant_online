@@ -16,11 +16,15 @@ svg {
 .line {
     stroke: #DCDCDC;
     stroke-width:1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .lineError {
     stroke: #FF0000;
     stroke-width:1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .rectFloor {
