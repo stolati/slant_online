@@ -15,8 +15,6 @@ WORKDIR /code/
 
 COPY ./from_simon .
 
-RUN ./configure
-
 RUN bash ./build.bash
 
 RUN mv ./slantsolver ./slant_puzzle
