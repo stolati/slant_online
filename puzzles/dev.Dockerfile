@@ -9,13 +9,17 @@ RUN apk add --update-cache \
         gtk+3.0-dev \
   && rm -rf /var/cache/apk/*
 
+RUN apk add bash
+
 WORKDIR /code/
 
 COPY ./from_simon .
 
-RUN ./configure && \
-    make slantsolver &&\
-    mv ./slantsolver ./slant_puzzle
+RUN ./configure
+
+RUN bash ./build.bash
+
+RUN mv ./slantsolver ./slant_puzzle
 
 # Test the slant_puzzle binary is working properly
 RUN /code/slant_puzzle 10x10dh seed
