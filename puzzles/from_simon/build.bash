@@ -17,8 +17,6 @@ function gcc_call() {
   local name="$1"
  shift
   gcc_base_call \
-    -I. \
-    -I././ \
     -MT ${name}.o \
     -MD \
     -MP \
@@ -36,7 +34,6 @@ gcc_call nullfe
 gcc_call random
 
 gcc_base_call \
-  -I. \
   -MD \
   -MP \
   -c \
