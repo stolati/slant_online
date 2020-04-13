@@ -1,23 +1,18 @@
 FROM alpine:3.11
 
 RUN apk add --update-cache \
-        perl \
-        autoconf \
-        automake \
         build-base \
-        gtk+2.0-dev \
-        gtk+3.0-dev \
+        bash \
   && rm -rf /var/cache/apk/*
 
 WORKDIR /code/
 
 COPY ./from_simon .
 
-RUN ./mkfiles.pl && \
-    ./mkauto.sh && \
-    ./configure && \
-    make slantsolver &&\
-    mv ./slantsolver ./slant_puzzle
+RUN bash ./build.bash && \
+     mv ./slantsolver ./slant_puzzle && \
+     `# Test the slant_puzzle binary is working properly`  \
+     /code/slant_puzzle 10x10dh seed
 
 FROM python:3.6-alpine3.11
 

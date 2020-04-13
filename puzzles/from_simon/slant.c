@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <math.h>
+#include <stdarg.h>
 
 #include "puzzles.h"
 
@@ -2188,102 +2189,8 @@ const struct game thegame = {
     0,				       /* flags */
 };
 
-#ifdef STANDALONE_SOLVER_OLD
-
-#include <stdarg.h>
-
-int main(int argc, char **argv)
-{
-    game_params *p;
-    game_state *s;
-    char *id = NULL, *desc;
-    const char *err;
-    bool grade = false;
-    int ret, diff;
-    bool really_verbose = false;
-    struct solver_scratch *sc;
-
-    while (--argc > 0) {
-        char *p = *++argv;
-        if (!strcmp(p, "-v")) {
-            really_verbose = true;
-        } else if (!strcmp(p, "-g")) {
-            grade = true;
-        } else if (*p == '-') {
-            fprintf(stderr, "%s: unrecognised option `%s'\n", argv[0], p);
-            return 1;
-        } else {
-            id = p;
-        }
-    }
-
-    if (!id) {
-        fprintf(stderr, "usage: %s [-g | -v] <game_id>\n", argv[0]);
-        return 1;
-    }
-
-    desc = strchr(id, ':');
-    if (!desc) {
-        fprintf(stderr, "%s: game id expects a colon in it\n", argv[0]);
-        return 1;
-    }
-    *desc++ = '\0';
-
-    p = default_params();
-    decode_params(p, id);
-    err = validate_desc(p, desc);
-    if (err) {
-        fprintf(stderr, "%s: %s\n", argv[0], err);
-        return 1;
-    }
-    s = new_game(NULL, p, desc);
-
-    sc = new_scratch(p->w, p->h);
-
-    /*
-     * When solving an Easy puzzle, we don't want to bother the
-     * user with Hard-level deductions. For this reason, we grade
-     * the puzzle internally before doing anything else.
-     */
-    ret = -1;			       /* placate optimiser */
-    for (diff = 0; diff < DIFFCOUNT; diff++) {
-	ret = slant_solve(p->w, p->h, s->clues->clues,
-			  s->soln, sc, diff);
-	if (ret < 2)
-	    break;
-    }
-
-    if (diff == DIFFCOUNT) {
-	if (grade)
-	    printf("Difficulty rating: harder than Hard, or ambiguous\n");
-	else
-	    printf("Unable to find a unique solution\n");
-    } else {
-	if (grade) {
-	    if (ret == 0)
-		printf("Difficulty rating: impossible (no solution exists)\n");
-	    else if (ret == 1)
-		printf("Difficulty rating: %s\n", slant_diffnames[diff]);
-	} else {
-	    verbose = really_verbose;
-	    ret = slant_solve(p->w, p->h, s->clues->clues,
-			      s->soln, sc, diff);
-	    if (ret == 0)
-		printf("Puzzle is inconsistent\n");
-	    else
-		fputs(game_text_format(s), stdout);
-	}
-    }
-
-    return 0;
-}
-
-#endif
 
 
-#ifdef STANDALONE_SOLVER
-
-#include <stdarg.h>
 
 
 int main(int argc, char **argv)
@@ -2326,5 +2233,4 @@ int main(int argc, char **argv)
 
 }
 
-#endif
 /* vim: set shiftwidth=4 tabstop=8: */
