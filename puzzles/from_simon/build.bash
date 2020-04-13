@@ -67,8 +67,7 @@ gcc_base_call \
   .deps/libslant2_a-slant.Tpo \
   -c \
   -DSTANDALONE_SOLVER \
-  -o ./libslant2_a-slant.o $(test -f './slant.c' || echo './')./slant.c
-mv -f .deps/libslant2_a-slant.Tpo .deps/libslant2_a-slant.Po
+  -o ./libslant2_a-slant.o ./slant.c
 
 gcc_base_call \
   -o slantsolver \
