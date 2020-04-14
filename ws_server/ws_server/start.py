@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 
+
 import asyncio
 import websockets
+
+
+all_websockets = set()
+
+# async sendMessageToAll(message):
+#     for websocket in all_websockets:
+#         await websokcet.send(message)
+
 
 async def echo(websocket, path):
     async for message in websocket:

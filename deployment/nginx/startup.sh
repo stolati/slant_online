@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -x
 
-/code/wait-for-it.sh server:5000 -t 300
-/code/wait-for-it.sh client:3000 -t 300
-/code/wait-for-it.sh ws_server:8080 -t 300
+#/code/wait-for-it.sh server:5000 -t 300
+#/code/wait-for-it.sh client:3000 -t 300
+#/code/wait-for-it.sh ws_server:8080 -t 300
 
 
 # TODO use inotify to restart ngnix if it changes.

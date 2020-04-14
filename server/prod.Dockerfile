@@ -1,4 +1,4 @@
-FROM python:3.6-alpine3.11
+FROM python:3.8.2-alpine3.11
 
 WORKDIR /srv
 
@@ -13,5 +13,5 @@ COPY slant_server /srv/slant_server
 
 EXPOSE 5000
 
-CMD python3.6 /srv/slant_server/server_start.py
+CMD python3.8 /srv/slant_server/server_start.py
 

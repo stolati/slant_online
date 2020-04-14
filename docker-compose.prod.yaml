@@ -28,3 +28,10 @@ services:
         dockerfile: nginx.prod.Dockerfile
       ports:
         - "80:80"
+  async:
+    image: slant_async:prod
+    build:
+      context: ./async
+      dockerfile: dev.Dockerfile
+    ports:
+      - "8081:8081"

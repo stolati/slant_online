@@ -28,8 +28,9 @@ for image in $images ; do
     copy_image "$image"
 done
 
-ascp_root ./docker-compose.yaml
+ascp_root ../docker-compose.prod.yaml
 
+assh ls
 
 exit 0
 
@@ -39,4 +40,5 @@ alias docker-compose='docker run --rm \
     -w="$PWD" \
     docker/compose:1.24.0'
 
-docker-compose --no-build up
+docker-compose --no-build -f docker-compose.prod.yaml up
+

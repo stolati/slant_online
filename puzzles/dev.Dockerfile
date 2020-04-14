@@ -14,7 +14,7 @@ RUN bash ./build.bash && \
      `# Test the slant_puzzle binary is working properly`  \
      /code/slant_puzzle 10x10dh seed
 
-FROM python:3.6-alpine3.11
+FROM python:3.8.2-alpine3.11
 
 WORKDIR /srv
 
@@ -32,5 +32,5 @@ EXPOSE 5001
 
 RUN ls *
 
-CMD ["python3.6", "./service.py"]
+CMD ["python3.8", "./service.py"]
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eux -o pipefail
+et -eux -o pipefail
 
 function gcc_base_call() {
   gcc \
