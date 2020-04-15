@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useCallback, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import {
@@ -9,7 +9,7 @@ import {
     pushAnswer,
 } from './zoneSlice';
 import styles from './Zone.module.css';
-import { range, getRelativeCoordinates, uuidv4, getElementBox, throttle } from '../../utils';
+import { range, getRelativeCoordinates, getElementBox, throttle,postphoneAsync  } from '../../utils';
 import { getLoopSolution, getNumberColor  } from './zoneUtils';
 const io = require('socket.io-client');
 
@@ -20,13 +20,19 @@ const io = require('socket.io-client');
 //   CIRCLE_SIZE: 4, // circle size
 //}
 
-const LOCAL_UUID = uuidv4();
-
 const socketIo = new io();
 
-socketIo.on('connect', ()=>console.log("socketIo connect", socketIo.id) );
-socketIo.on('connected', ()=>console.log("socketIo connected") );
-socketIo.on('disconnected', ()=>console.log("socketIo disconnected") );
+socketIo.whenConnected = (fct) => {
+    if(socketIo.connected){
+        postphoneAsync(fct);
+    }
+
+    socketIo.on('connect', fct);
+
+    return () => {
+        socketIo.off('connect', fct);
+    }
+}
 
 
 
@@ -36,25 +42,34 @@ export function Zone(props) {
    const content = useSelector(selectZone(zoneId));
    const contentPresent = !!content;
 
-   const sendMouseMoveEvent = useCallback((pos)=>{ socketIo.emit('mouse_move', pos); }, []);
-   const sendMouseClickEvent = useCallback((e)=>{ socketIo.emit('mouse_click', e); }, []);
-
+   const sendMouseMoveEvent = (pos)=>{ socketIo.emit('mouse_move', pos); };
+   const sendMouseClickEvent = (e)=>{ socketIo.emit('mouse_click', e); };
+   const sendSetZoneEvent = ()=>{ socketIo.emit('set_zone', {zone_path: zoneId}) };
+   const sendLeaveZoneEvent = ()=>{ socketIo.emit('leave_zone'); };
 
    const [stateOtherMouse, setStateOtherMouse] = useState({});
    //Init without all zeros to avoid divide by 0
-   const [stateDivBox, setStateDivBox] = useState({top:0, left: 0, width: 1, height:1});
+//   const [stateDivBox, setStateDivBox] = useState({top:0, left: 0, width: 1, height:1});
 
    useEffect(()=>{
         if(!contentPresent){
             dispatch(fetchZone(zoneId));
         }
-   }, [zoneId, dispatch, contentPresent]);
+   }, [zoneId, contentPresent]);
+
+
+   useEffect(()=>{
+        const cleanMethod = socketIo.whenConnected(sendSetZoneEvent)
+
+        return ()=>{
+            sendLeaveZoneEvent()
+            cleanMethod()
+        }
+   }, [zoneId]);
 
 
     useEffect(() => {
-
         socketIo.on('mouse_move', data => {
-            console.log("mouse_move from server", data);
             const {x, y, sid} = data;
             setStateOtherMouse({[sid]: {x, y}});
         });
@@ -68,7 +83,8 @@ export function Zone(props) {
             )
         });
 
-    }, [dispatch]);
+    }, [dispatch, setStateOtherMouse, zoneId]);
+
 
 
    let {height, width, problem, solution, solved} = content || {height:0, width:0, problem:[], solution:[], solved:false};
@@ -95,7 +111,7 @@ export function Zone(props) {
 
       e.preventDefault();
 
-      setStateDivBox(getElementBox(e.target));
+//      setStateDivBox(getElementBox(e.target));
 
       let posDiv = getRelativeCoordinates(e, e.target);
 
@@ -151,7 +167,7 @@ export function Zone(props) {
     const onMouseMove = useCallback(
         (e) => {
             const divElementBox = getElementBox(e.target);
-            setStateDivBox(divElementBox);
+//            setStateDivBox(divElementBox);
 
             const toSend = {
                 x: ((e.pageX - divElementBox.left) * 1.0) / divElementBox.width,
@@ -286,10 +302,8 @@ export function Zone(props) {
                     return null;
                 }
 
-                console.log(value);
                 const transformY = Math.round(value.y * viewBoxHeight);
                 const transformX = Math.round(value.x * viewBoxWidth);
-                console.log(`translate(${transformX}px, ${transformY}px)`);
                 let box = {
                     key,
                     height: 6,
@@ -306,8 +320,6 @@ export function Zone(props) {
 //                        transition: 'transform .5s ease-in-out',
                     }
                 }
-
-                console.log(box);
 
                 return <image {...box} href={process.env.PUBLIC_URL+ "/mouse_pointer-purple.svg"}/>
 ////                return <rect fill="black" {...box} key={key} />;

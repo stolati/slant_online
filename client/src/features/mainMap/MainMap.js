@@ -5,16 +5,7 @@ import {
     selectMainMap,
 } from './mainMapSlice.js';
 import {Link } from 'react-router-dom';
-//import {
-//  decrement,
-//  increment,
-//  incrementByAmount,
-//  incrementAsync,
-//  selectCount,
-//} from './counterSlice';
-//import styles from './Counter.module.css';
-//
-//import {NavLink} from 'react-router-dom';
+
 
 import styles from './MainMap.module.css';
 
