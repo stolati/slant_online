@@ -24,5 +24,6 @@ Next features:
 
 - Merge the python servers into a single one.
 - Figure out how to spread websockets properly.
+- Have a real database (maybe sql), with fake one for local dev, and saving data for production (mabye aws rds).
 
 Then after all that, I guess its going to be done. Maybe send an email to Simon to say how I appreciate his games.
