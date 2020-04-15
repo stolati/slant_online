@@ -27,3 +27,9 @@ Next features:
 - Have a real database (maybe sql), with fake one for local dev, and saving data for production (mabye aws rds).
 
 Then after all that, I guess its going to be done. Maybe send an email to Simon to say how I appreciate his games.
+
+- Better hosting and deployment :
+  - https://rollout.io/blog/the-shortlist-of-docker-hosting/
+  - travis ci
+  - docker hub account (needed ?)
+  - Use specfic account for this.
