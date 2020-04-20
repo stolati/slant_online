@@ -8,7 +8,9 @@
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
     "axios": "^0.19.2",
-    "eslint": "^6.8.0",
+    "eslint": "6.8.0",
+    "json-stable-stringify": "^1.0.1",
+    "prettier-eslint": "^9.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",
@@ -22,7 +24,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "prettier": "prettier 'src/**/*.js'",
+    "prettier": "prettier --write 'src/**/*.js'",
     "eslint-check": "eslint --print-config .eslintrc.js | eslint-config-prettier-check"
   },
   "eslintConfig": {
@@ -54,10 +56,13 @@
     ]
   },
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint-config-last": "0.0.5",
     "eslint-config-prettier": "^6.10.1",
-    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-prettier": "^3.1.3",
+    "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^3.0.0",
-    "prettier": "^2.0.2"
+    "prettier": "^2.0.4"
   },
   "prettier": {
     "jsxBracketSameLine": true,
