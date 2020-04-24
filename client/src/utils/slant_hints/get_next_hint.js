@@ -12,6 +12,7 @@
 
 import stringify from 'json-stable-stringify'
 import { matrixMap, range } from '../../utils'
+import { getLoopGroupHints, getLoopGroupSolution } from './get_hint_loop'
 
 // here instead of \\, we're going to use L
 
@@ -73,6 +74,22 @@ const changeSlashOrientation = (e) => {
   }[e]
 }
 
+const changeSlashExpectation = (e) => {
+  return {
+    [STATE_RULE.NOT_IMPORTANT]: STATE_RULE.NOT_IMPORTANT,
+    [STATE_RULE.NUMBER_0]: STATE_RULE.NUMBER_0,
+    [STATE_RULE.NUMBER_1]: STATE_RULE.NUMBER_1,
+    [STATE_RULE.NUMBER_2]: STATE_RULE.NUMBER_2,
+    [STATE_RULE.NUMBER_3]: STATE_RULE.NUMBER_3,
+    [STATE_RULE.NUMBER_4]: STATE_RULE.NUMBER_4,
+    [STATE_RULE.SLASH_FORWARD_EXPECTED]: STATE_RULE.SLASH_FORWARD_RESULT,
+    [STATE_RULE.SLASH_BACKWARD_EXPECTED]: STATE_RULE.SLASH_BACKWARD_RESULT,
+    [STATE_RULE.SLASH_FORWARD_RESULT]: STATE_RULE.SLASH_FORWARD_EXPECTED,
+    [STATE_RULE.SLASH_BACKWARD_RESULT]: STATE_RULE.SLASH_BACKWARD_EXPECTED,
+    [STATE_RULE.BORDER]: STATE_RULE.BORDER,
+  }[e]
+}
+
 const textToState = (s) => {
   return {
     '0': STATE_RULE.NUMBER_0,
@@ -87,10 +104,18 @@ const textToState = (s) => {
     '//?': STATE_RULE.SLASH_FORWARD_EXPECTED,
     '\\!': STATE_RULE.SLASH_BACKWARD_RESULT,
     '\\?': STATE_RULE.SLASH_BACKWARD_EXPECTED,
+    '*': STATE_RULE.BORDER,
   }[s.trim()]
 }
 
 const parse_rule = (rule) => {
+  const INVERTED_TEXT = 'INVERTED_VALID'
+  let invertedValid = false
+  if (rule.startsWith(INVERTED_TEXT)) {
+    invertedValid = true
+    rule = rule.slice(INVERTED_TEXT.length)
+  }
+
   const lines = rule
     .split('\n')
     .filter((l) => l.trim() !== '')
@@ -140,7 +165,7 @@ const parse_rule = (rule) => {
   const numberLines = lines.filter((l) => l.isNumberLine).map((l) => l.content)
   const slashLines = lines.filter((l) => !l.isNumberLine).map((l) => l.content)
 
-  return { num: numberLines, slash: slashLines }
+  return { num: numberLines, slash: slashLines, invertedValid }
 }
 
 const print_rule = (rule) => {
@@ -236,6 +261,24 @@ const mirrorRuleTopBottom = (rule) => {
   }
 }
 
+const addInvertRule = (rule) => {
+  if (!rule.invertedValid) {
+    return {
+      slash: rule.slash,
+      num: rule.num,
+    }
+  }
+
+  const invertedSlash = rule.slash.map((l) => l.map(changeSlashExpectation))
+
+  return [
+    //Rule without the invertedValid
+    { slash: rule.slash, num: rule.num },
+    //Invert rule
+    { slash: invertedSlash, num: rule.num },
+  ]
+}
+
 const generateAllVersions = (rule) => {
   let rotate0 = rule
   let rotate90 = rotateRule(rotate0)
@@ -253,121 +296,159 @@ const generateAllVersions = (rule) => {
   return distinct(res)
 }
 
-basic_rules.map(parse_rule).map(generateAllVersions).flat().map(print_rule)
+const calculatedRules = distinct(
+  basic_rules
+    .map(parse_rule)
+    .map(addInvertRule)
+    .flat()
+    .map(generateAllVersions)
+    .flat()
+)
+
+calculatedRules.forEach(print_rule)
 
 /**
  * Case of 11 near each other, and 33 near each others
  */
-const case_11 = (problem, solution) => {
-  let res = []
+const lookForRules = (problem, solution) => {
+  let allToApply = []
   const width = problem[0].length,
     height = problem.length
 
-  const getSol = (x, y, empty = ' ') => {
+  const getSol = (x, y) => {
     const line = solution[y]
-    if (line === undefined) return empty
-    const cell = solution[x]
-    if (cell === undefined) return empty
-    return cell
-  }
-
-  const getElem = (x, y, empty = ' ') => {
-    const line = problem[y]
-    if (line === undefined) return empty
+    if (line === undefined) return '*'
     const cell = line[x]
-    if (cell === undefined) return empty
+    if (cell === undefined) return '*'
     return cell
   }
 
-  // top-left, top-right, bottom-left, bottom right
-  const getSolAround = (x, y, outOfBound = null) => {
-    return {
-      tl: { e: getSol(x - 1, y - 1, outOfBound), x: x - 1, y: y - 1 },
-      tr: { e: getSol(x, y - 1, outOfBound), x: x, y: y - 1 },
-      bl: { e: getSol(x - 1, y, outOfBound), x: x - 1, y: y },
-      br: { e: getSol(x, y, outOfBound), x: x, y: y },
-    }
+  const getElem = (x, y) => {
+    const line = problem[y]
+    if (line === undefined) return '*'
+    const cell = line[x]
+    if (cell === undefined) return '*'
+    return cell
   }
 
-  matrixMap(width, height, (x, y) => {
-    const atTop = y === 0
-    const atLeft = x === 0
-    const atBottom = y === height - 1
-    const atRight = x === width - 1
-    if (atTop || atLeft || atBottom || atRight) {
-      return
+  const applyRule = (applyX, applyY, r) => {
+    let toApply = []
+    let valid = true
+
+    r.num.forEach((line, lineY) => {
+      line.forEach((ruleCell, lineX) => {
+        const solX = applyX + lineX,
+          solY = applyY + lineY
+        const s = getElem(solX, solY)
+
+        switch (ruleCell) {
+          case STATE_RULE.NOT_IMPORTANT:
+            break
+          case STATE_RULE.NUMBER_0:
+            if (s !== '0') valid = false
+            break
+          case STATE_RULE.NUMBER_1:
+            if (s !== '1') valid = false
+            break
+          case STATE_RULE.NUMBER_2:
+            if (s !== '2') valid = false
+            break
+          case STATE_RULE.NUMBER_3:
+            if (s !== '3') valid = false
+            break
+          case STATE_RULE.NUMBER_4:
+            if (s !== '4') valid = false
+            break
+          default:
+            console.assert(false, `${s} ${ruleCell}`)
+        }
+      })
+    })
+
+    r.slash.forEach((line, lineY) => {
+      line.forEach((ruleCell, lineX) => {
+        const solX = applyX + lineX - 1,
+          solY = applyY + lineY - 1
+        const s = getSol(solX, solY)
+
+        switch (ruleCell) {
+          case STATE_RULE.NOT_IMPORTANT:
+            if (s === '*')
+              // We found a wall when there wasn't any
+              valid = false
+            //The rest ignore
+            break
+          case STATE_RULE.BORDER:
+            if (s !== '*') valid = false
+            break
+          case STATE_RULE.SLASH_FORWARD_EXPECTED:
+            if (s !== '/') valid = false
+            break
+          case STATE_RULE.SLASH_BACKWARD_EXPECTED:
+            if (s !== '\\') valid = false
+            break
+          case STATE_RULE.SLASH_BACKWARD_RESULT:
+            if (s === ' ') toApply.push({ x: solX, y: solY, s: '\\' })
+            break
+          case STATE_RULE.SLASH_FORWARD_RESULT:
+            if (s === ' ') toApply.push({ x: solX, y: solY, s: '/' })
+            break
+          default:
+            console.assert(false, `${s} ${ruleCell}`)
+        }
+      })
+    })
+
+    if (!valid) {
+      return []
     }
+    return toApply
+  }
 
-    let elem = getElem(x, y)
-    let elemDown = getElem(x, y + 1)
-    let elemRight = getElem(x + 1, y)
-
-    if (elem === '1' && elemDown === '1') {
-      let solAroundElem = getSolAround(x, y)
-      let solAroundElemDown = getSolAround(x, y + 1)
-
-      let shouldBe = [
-        { pos: solAroundElem.tl, s: '/' },
-        { pos: solAroundElem.tr, s: '\\' },
-        { pos: solAroundElemDown.bl, s: '\\' },
-        { pos: solAroundElemDown.br, s: '/' },
-      ]
-      res.push(...shouldBe)
-    }
-
-    if (elem === '1' && elemRight === '1') {
-      let solAroundElem = getSolAround(x, y)
-      let solAroundElemRight = getSolAround(x + 1, y)
-
-      let shouldBe = [
-        { pos: solAroundElem.tl, s: '/' },
-        { pos: solAroundElem.bl, s: '\\' },
-        { pos: solAroundElemRight.tr, s: '\\' },
-        { pos: solAroundElemRight.br, s: '/' },
-      ]
-      res.push(...shouldBe)
-    }
-
-    if (elem === '3' && elemDown === '3') {
-      let solAroundElem = getSolAround(x, y)
-      let solAroundElemDown = getSolAround(x, y + 1)
-
-      let shouldBe = [
-        { pos: solAroundElem.tl, s: '\\' },
-        { pos: solAroundElem.tr, s: '/' },
-        { pos: solAroundElemDown.bl, s: '/' },
-        { pos: solAroundElemDown.br, s: '\\' },
-      ]
-      res.push(...shouldBe)
-    }
-
-    if (elem === '3' && elemRight === '3') {
-      let solAroundElem = getSolAround(x, y)
-      let solAroundElemRight = getSolAround(x + 1, y)
-
-      let shouldBe = [
-        { pos: solAroundElem.tl, s: '\\' },
-        { pos: solAroundElem.bl, s: '/' },
-        { pos: solAroundElemRight.tr, s: '/' },
-        { pos: solAroundElemRight.br, s: '\\' },
-      ]
-      res.push(...shouldBe)
-    }
+  range(height).forEach((_, y) => {
+    range(width).forEach((_, x) => {
+      calculatedRules.forEach((r) => {
+        let toApply = applyRule(x, y, r)
+        toApply.forEach((e) => allToApply.push(e))
+      })
+    })
   })
-
-  return res
-}
-
-const caseNoMoreChoice = (problem, solution) => {
-  return []
+  return allToApply
 }
 
 export const getNextHint = (problem, solution) => {
-  let caseNoMoreChoiceFindings = caseNoMoreChoice(problem, solution)
+  let lookForRulesRes = lookForRules(problem, solution)
+  if (lookForRulesRes.length !== 0) {
+    return lookForRulesRes
+  }
 
-  let case11Findings = case_11(problem, solution)
+  let loopGroupHintsRes = getLoopGroupHints(problem, solution)
+  if (loopGroupHintsRes.length !== 0) {
+    return loopGroupHintsRes
+  }
 
-  console.log(case11Findings)
+  return []
+}
 
-  return case11Findings
+export const getNextHintAll = (problem, solution) => {
+  let curSolution = solution.map((l) => l.slice())
+
+  let allHints = []
+  let hints = getNextHint(problem, curSolution)
+  hints.forEach((hint) => {
+    curSolution[hint.y][hint.x] = hint.s
+  })
+
+  allHints.push(hints)
+
+  while (hints.length !== 0) {
+    hints = getNextHint(problem, curSolution)
+    allHints.push(hints)
+
+    hints.forEach((hint) => {
+      curSolution[hint.y][hint.x] = hint.s
+    })
+  }
+
+  return [].concat(...allHints)
 }

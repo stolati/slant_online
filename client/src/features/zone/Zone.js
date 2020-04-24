@@ -7,6 +7,7 @@ import {
   leftClick,
   rightClick,
   pushAnswer,
+  specifyState,
 } from './zoneSlice'
 import styles from './Zone.module.css'
 import {
@@ -18,7 +19,7 @@ import {
   postphoneAsyncWithTime,
 } from '../../utils'
 import { getLoopSolution } from '../../utils/slant_hints/loops'
-import { getNextHint } from '../../utils/slant_hints/get_next_hint'
+import { getNextHintAll } from '../../utils/slant_hints/get_next_hint'
 import {
   PROBLEM_STATE,
   extractProblemState,
@@ -193,25 +194,15 @@ export function Zone(props) {
   ])
 
   const getHint = () => {
-    const hints = getNextHint(problem, solution)
+    const hints = getNextHintAll(problem, solution)
 
-    const dispatchHint = (h) => {
-      let { pos, s } = h
+    hints.forEach((h) => {
+      dispatch(specifyState({ zoneId, ...h }))
+    })
 
-      let d = { zoneId, ...pos }
-
-      if (s === '/') dispatch(rightClick(d))
-      else dispatch(leftClick(d))
-    }
-
-    // postphoneAsyncWithTime(
-    //   1000,
-    //   hints.map((h) => {
-    //     return () => dispatchHint(h)
-    //   })
-    // )
-
-    hints.map(dispatchHint)
+    // if (hints.length !== 0) {
+    //   getHint()
+    // }
   }
 
   if (!contentPresent) {

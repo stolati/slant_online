@@ -8,7 +8,6 @@ export const fetchZone = createAsyncThunk(
   'zone:fetchZone:status',
   async (zoneId, thunkAPI) => {
     const response = await axios.get(`/api/zones/${zoneId}`)
-    console.log(response)
     return response.data
   }
 )
@@ -32,6 +31,10 @@ export const slice = createSlice({
   name: 'zone',
   initialState: {},
   reducers: {
+    specifyState: (state, action) => {
+      let { x, y, zoneId, s } = action.payload
+      state[zoneId].solution[y][x] = s
+    },
     leftClick: (state, action) => {
       let { x, y, zoneId } = action.payload
       let zone = state[zoneId]
@@ -83,7 +86,7 @@ export const slice = createSlice({
   },
 })
 
-export const { leftClick, rightClick } = slice.actions
+export const { leftClick, rightClick, specifyState } = slice.actions
 
 export const selectZone = (zoneId) => (state) => state.zone[zoneId]
 
