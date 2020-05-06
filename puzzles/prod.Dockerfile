@@ -25,7 +25,7 @@ RUN pip install Flask==1.1.1
 ENV FLASK_APP=service.py
 ENV FLASK_ENV=production
 
-COPY puzzle_service/service.py ./
+COPY puzzle_service_py ./
 
 EXPOSE 5001
 

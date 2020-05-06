@@ -26,7 +26,7 @@ ENV FLASK_APP=service.py
 ENV FLASK_ENV=development
 ENV ENVIRONMENT=DEV
 
-COPY puzzle_service/service.py ./
+COPY puzzle_service_py ./
 
 EXPOSE 5001
 

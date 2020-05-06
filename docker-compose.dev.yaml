@@ -7,6 +7,13 @@ services:
       dockerfile: dev.Dockerfile
     ports:
       - "5001:5001"
+  puzzle_go:
+    image: slant_puzzle_go:latest
+    build:
+      context: ./puzzles
+      dockerfile: dev.go.Dockerfile
+    ports:
+      - "5002:5002"
   client:
     build:
       context: ./client

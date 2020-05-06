@@ -3,8 +3,8 @@
 import setuptools
 from distutils.core import setup
 
-setup(name='puzzle_service',
+setup(name='puzzle_service_py',
       version='1.0',
-      packages=['puzzle_service'],
+      packages=['puzzle_service_py'],
      )
 
