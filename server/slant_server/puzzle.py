@@ -51,9 +51,9 @@ def get_puzzle(seed=None, width=12, height=12, difficulty=DIFFICULTY_HARD):
     output = output.decode('utf-8')
 
     # TODO: Make the game binary exscape the \ in json solution
-    output = output.replace('\\', '.')
+    #output = output.replace('\\', '.')
     json_output = json.loads(output)
-    json_output['solution'] = json_output['solution'].replace('.', '\\')
+    #json_output['solution'] = json_output['solution'].replace('.', '\\')
 
     json_output['solution'] = list(divide_chunks(json_output['solution'], width))
     json_output['problem'] = list(divide_chunks(extract_problem(json_output['problem']), width+1))

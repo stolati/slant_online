@@ -17,19 +17,31 @@ RUN bash ./build.bash && \
 
 FROM golang:1.14.2-alpine3.11
 
-WORKDIR /code
+RUN apk add git
+# Used in dev mode
+RUN go get github.com/codegangsta/gin
 
-COPY --from=slant_bin /code/slant_puzzle /code/slant_puzzle
+WORKDIR /code
+ENV PATH=$PATH:/code
+
+COPY --from=slant_bin /code/slant_puzzle ./slant_puzzle
+
+
+COPY ./puzzle_service_go/go.mod ./puzzle_service_go/go.sum ./
+RUN go mod download
 
 ADD ./puzzle_service_go/ .
-
 RUN go build -o server .
 
-ENV MARTINI_ENV=production
-ENV PATH=/code:/bin/:.
+ENV MARTINI_ENV=development
 
-CMD ["/code/server"]
+RUN PATH=$PATH:/code \
+    PUZZLE_SERVICE_CHECK_ONLY=1 \
+    server
 
+CMD ["gin", "--port", "5002", "--appPort", "5003", "--immediate", "run", "server.go"]
+
+# To have a single go binary :
 #CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
 
 

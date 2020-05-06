@@ -7,6 +7,8 @@ import (
 	"github.com/martini-contrib/render"
 	"log"
 	"math/rand"
+	"net/http"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -46,58 +48,70 @@ func main() {
 
 		r.JSON(200, status)
 	})
-	m.Get("/puzzle", func(r render.Render, m martini.Params){
+	m.Get("/puzzle", func(render render.Render, request *http.Request){
 
-		width, widthFound := m["width"]
-		if !widthFound {
+		qs := request.URL.Query()
+
+		width := qs.Get("width")
+		if width == "" {
 			width = "12"
 		}
-		height, heightFound := m["height"]
-		if !heightFound {
-			height = "12"
-		}
-		difficulty, difficultyFound := m["difficulty"]
-		if !difficultyFound {
-			difficulty = "HARD"
-		}
-		seed, seedFound := m["seed"]
-		if !seedFound {
-			seed = strconv.FormatInt(rand.Int63(),10)
-		}
-
 		widthInt, err := strconv.Atoi(width)
 		if err != nil {
 			log.Println(err)
-			r.JSON(502, "error")
+			render.JSON(502, "error")
 			return
 		}
 
+		height := qs.Get("height")
+		if height == "" {
+			height = "12"
+		}
 		heightInt, err := strconv.Atoi(height)
 		if err != nil {
 			log.Println(err)
-			r.JSON(502, "error")
+			render.JSON(502, "error")
 			return
 		}
+
+		difficulty := qs.Get("difficulty")
+		if difficulty == "" {
+			difficulty = "HARD"
+		}
+		seed := qs.Get("seed")
+		if seed == "" {
+			seed = strconv.FormatInt(rand.Int63(),10)
+		}
+
 
 		puzzle, err := generatePuzzle(widthInt, heightInt, difficulty, seed)
 
 		if err != nil {
 			log.Println(err)
-			r.JSON(502, "error")
+			render.JSON(502, "error")
 			return
 		}
 
-		r.JSON(200, puzzle)
+		render.JSON(200, puzzle)
 	})
 
+	//Check that we have access to the binary to generate puzzles
 	puzzle, err := generatePuzzle(12, 5, "HARD", "toto")
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(puzzle)
 
-	m.RunOnAddr(":5002")
+	_, found := os.LookupEnv("PUZZLE_SERVICE_CHECK_ONLY")
+
+	if found {
+		//Doesn't start the server
+		return
+	}
+
+	m.RunOnAddr(":5003")
 }
+
 
 func generatePuzzle(width int, height int, difficulty string, seed string) (Puzzle, error) {
 
@@ -111,11 +125,14 @@ func generatePuzzle(width int, height int, difficulty string, seed string) (Puzz
 		difficultyLetter = "e"
 	}
 
-	sizeParam := fmt.Sprintf("%sx%sd%s", width, height, difficultyLetter)
+	sizeParam := fmt.Sprintf("%dx%dd%s", width, height, difficultyLetter)
 
+	fmt.Println("Generating puzzle", sizeParam, seed)
 	cmd := exec.Command("slant_puzzle", sizeParam, seed)
 
 	commandOutput, err := cmd.CombinedOutput()
+
+	//fmt.Println(string(commandOutput))
 
 	if err != nil {
 		return Puzzle{}, err
