@@ -33,3 +33,6 @@ Then after all that, I guess its going to be done. Maybe send an email to Simon 
   - travis ci
   - docker hub account (needed ?)
   - Use specfic account for this.
+
+- Game in other formats :
+  - http://manpages.ubuntu.com/manpages/precise/man6/slant.6.html
