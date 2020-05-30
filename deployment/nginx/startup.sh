@@ -12,8 +12,10 @@ set -x
 
 # TODO use something like forever https://www.npmjs.com/package/forever
 
+nginx -t
 nginx
 while sleep 5; do
+  nginx -t
   nginx
 done
 
