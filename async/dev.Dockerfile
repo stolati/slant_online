@@ -15,6 +15,8 @@ RUN pip install -r requirements.txt
 
 COPY server ./server
 
+ENV PYTHONPATH=/srv/server
+
 CMD AIO_PORT=8081 aiohttp-devtools runserver ./server
 
 
