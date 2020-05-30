@@ -13,7 +13,7 @@ prod-build:
 	docker-compose -f ./docker-compose.prod.yaml build
 
 prod-start: prod-build
-	ocker-compose -f ./docker-compose.prod.yaml up
+	docker-compose -f ./docker-compose.prod.yaml up
 
 prune:
 	docker system prune --all --force || true

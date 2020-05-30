@@ -26,15 +26,14 @@ WORKDIR /srv
 
 COPY --from=slant_bin /code/slant_puzzle /bin/slant_puzzle
 
-
 COPY puzzle_service ./puzzle_service/go.sum ./
 RUN go mod download
 
-ADD puzzle_service .
+COPY puzzle_service .
 RUN go build -o server .
 
-ENV MARTINI_ENV="development"
-ENV RUN_ON_ADDR=":5003"
+ENV MARTINI_ENV="development" \
+    RUN_ON_ADDR=":5003"
 
 RUN PUZZLE_SERVICE_CHECK_ONLY=1 ./server
 
