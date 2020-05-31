@@ -17,6 +17,7 @@ COPY server ./server
 
 ENV PYTHONPATH=/srv/server
 
+RUN mkdir /db
 CMD AIO_PORT=8081 aiohttp-devtools runserver ./server
 
 

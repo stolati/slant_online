@@ -26,5 +26,7 @@ services:
     build:
       context: ./server
       dockerfile: prod.Dockerfile
+    volumes:
+      - ./db:/db
     ports:
       - "8081:8081"

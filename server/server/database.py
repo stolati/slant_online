@@ -1,7 +1,7 @@
 from tinydb import TinyDB, Query
 from tinydb import operations
 
-db = TinyDB('./db.json')
+db = TinyDB('/db/db.json')
 
 
 class DbQueries(object):

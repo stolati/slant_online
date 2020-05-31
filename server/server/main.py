@@ -4,6 +4,7 @@ import sys
 import room
 import sio
 import zone_path_endpoint
+import database_endpoint
 
 def p(*args):
     print(repr(args), file=sys.stdout)
@@ -19,6 +20,7 @@ app = web.Application()
 # app['db'] = db
 
 app.add_routes(zone_path_endpoint.routes)
+app.add_routes(database_endpoint.routes)
 
 sio.attach(app, [room])
 
