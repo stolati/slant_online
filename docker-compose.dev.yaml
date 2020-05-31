@@ -27,7 +27,7 @@ services:
       context: ./server
       dockerfile: dev.Dockerfile
     volumes:
-      - ./async/server:/srv/server
+      - ./server/server:/srv/server
     ports:
       - "8081:8081"
   nginx:
