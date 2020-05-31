@@ -27,14 +27,14 @@ async def disconnect(sid):
 
 
 async def leaving_zone_room(sid):
-    room_name = get_zone_room(sid)
+    room_name = await get_zone_room(sid)
     if room_name:
         sio.leave_room(sid, room_name)
         new_amount_zone_usage = zone_usage.get(room_name, 0) - 1
         if new_amount_zone_usage > 0:
             zone_usage[room_name] = new_amount_zone_usage
         elif room_name in zone_usage:
-            del zone_usage[zone_usage]
+            del zone_usage[room_name]
         else:
             pass
 

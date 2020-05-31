@@ -1,8 +1,9 @@
 from aiohttp import web
 import sys
+
 import room
 import sio
-
+import zone_path_endpoint
 
 def p(*args):
     print(repr(args), file=sys.stdout)
@@ -13,33 +14,11 @@ def p(*args):
 # Websocket part
 ####################
 
-async def websocket_handler(request):
-    p('websokcet handler starts')
-    ws = web.WebSocketResponse()
-    await ws.prepare(request)
-
-    try:
-
-        async for msg in ws:
-            p(msg)
-            await ws.send_str(msg.data)
-
-    finally:
-        p('websocket connection closed')
-
-    return ws
-
-
-async def handle(request):
-    name = request.match_info.get('name', "Anonymous")
-    text = "Hello, " + name
-    return web.Response(text=text)
-
-
 app = web.Application()
-app.add_routes([
-    web.get('/ws', websocket_handler)
-])
+# db = await create_connection
+# app['db'] = db
+
+app.add_routes(zone_path_endpoint.routes)
 
 sio.attach(app, [room])
 
