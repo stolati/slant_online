@@ -400,7 +400,7 @@ export function Zone(props) {
           </g>
         </svg>
       </div>
-      <button onClick={getHint}>getHint</button>
+      {/*<button onClick={getHint}>getHint</button>*/}
     </div>
   )
 }
