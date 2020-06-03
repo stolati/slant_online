@@ -1,0 +1,18 @@
+version: "3"
+services:
+  puzzle:
+    build:
+      context: ./puzzles
+      dockerfile: prod.Dockerfile
+  client:
+    build:
+      context: ./client
+      dockerfile: prod.Dockerfile
+  nginx:
+      build:
+        context: ./deployment
+        dockerfile: nginx.prod.Dockerfile
+  server:
+    build:
+      context: ./server
+      dockerfile: prod.Dockerfile
