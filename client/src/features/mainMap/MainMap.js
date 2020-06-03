@@ -30,7 +30,7 @@ export function MainMap() {
 
   return (
     <div className={styles.main}>
-      <h1>Global map </h1>
+      <h1>World map</h1>
 
       <div className={styles.content}>{content.map(lineFct)}</div>
     </div>

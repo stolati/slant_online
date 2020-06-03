@@ -1,25 +1,25 @@
 import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import {
-  decrement,
-  increment,
-  incrementByAmount,
-  incrementAsync,
-  selectCount,
-} from './counterSlice'
-import styles from './Counter.module.css'
-
+import { selectCount } from './counterSlice'
+import ReactMarkdown from "react-markdown";
 import { NavLink } from 'react-router-dom'
+// import styles from './Counter.module.css'
 
+const markdown = `
+# Welcome to [slant.games]
+This is a game based on
+[Simon Tatham's Portable Puzzle Collection](https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/slant.html)
+
+The twist is to have a large map on which anyone can play.          
+`;
+
+//TODO : rename to main page
 export function Counter() {
-  const count = useSelector(selectCount)
-  const dispatch = useDispatch()
-  const [incrementAmount, setIncrementAmount] = useState('2')
-
   return (
     <div>
+      <ReactMarkdown source={markdown} />
       <NavLink exact to={'/main_map'}>
-        To Main Map
+        To the world map
       </NavLink>
     </div>
   )
