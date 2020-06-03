@@ -19,6 +19,8 @@ prune:
 	docker system prune --all --force || true
 	cd async && rm -r venv
 
+prod-deploy: prod-build copy-prod-db
+	./bin/deploy.bash
 
 copy-prod-db:
 	./bin/copy-prod-db.bash
