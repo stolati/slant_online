@@ -1,7 +1,7 @@
 version: "3"
 services:
   puzzle:
-    image: slant_puzzle_go:latest
+    image: slant_puzzle_go:dev
     build:
       context: ./puzzles
       dockerfile: dev.Dockerfile
@@ -13,7 +13,7 @@ services:
     build:
       context: ./client
       dockerfile: dev.Dockerfile
-    image: slant_client:latest
+    image: slant_client:dev
     volumes:
       - ./client/src:/srv/src
       - ./client/public:/srv/public
@@ -22,7 +22,7 @@ services:
     # Needed for the dev environment to starts
     stdin_open: true
   server:
-    image: slant_server:latest
+    image: slant_server:dev
     build:
       context: ./server
       dockerfile: dev.Dockerfile
