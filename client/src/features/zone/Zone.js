@@ -1,31 +1,17 @@
-import React, { useEffect, useLayoutEffect, useCallback, useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import React, { useEffect, useCallback, useState } from 'react'
+import { useDispatch } from 'react-redux'
 import {
   fetchZone,
-  selectZone,
   leftClick,
   rightClick,
   pushAnswer,
-  specifyState
+  specifyState,
 } from './zoneSlice'
 import styles from './Zone.module.css'
-import {
-  range,
-  getRelativeCoordinates,
-  getElementBox,
-  throttle,
-  postphoneAsync,
-  postphoneAsyncWithTime
-} from '../../utils'
-import { getLoopSolution } from '../../utils/slant_hints/loops'
+import { getRelativeCoordinates, getElementBox, throttle } from '../../utils'
 import { getNextHintAll } from '../../utils/slant_hints/get_next_hint'
-import {
-  PROBLEM_STATE,
-  extractProblemState
-} from '../../utils/slant_hints/problemState'
+import { PROBLEM_STATE } from '../../utils/slant_hints/problemState'
 import { socket } from '../../utils/socket'
-import { is_connected_side } from '../../utils/slant_hints/is_connected_side'
 import SlantState from '../../utils/slant_hints/slant_state'
 import { GridBox, HintText, SolutionLine } from './ZoneSvg'
 import ZoneDrawingHelper from './ZoneDrawingHelper'
@@ -33,7 +19,7 @@ import ZoneDrawingHelper from './ZoneDrawingHelper'
 export const NUMBER_STATE = {
   [PROBLEM_STATE.INVALID]: 'red',
   [PROBLEM_STATE.SOLVED]: 'green',
-  [PROBLEM_STATE.DEFAULT]: 'black'
+  [PROBLEM_STATE.DEFAULT]: 'black',
 }
 
 const zoneDrawingHelper = new ZoneDrawingHelper({
@@ -178,19 +164,20 @@ export default function Zone({ onSolve, zoneId, content }) {
     }
 
     sendMouseMoveEvent(toSend)
-  }, [])
+  })
 
   const onMouseOut = useCallback((e) => {
     sendMouseMoveEvent({
       x: null,
-      y: null
+      y: null,
     })
-  })
+  }, [])
 
   const throttledOnMouseMove = useCallback(throttle(onMouseMove, 500), [
     onMouseMove
   ])
 
+  // eslint-disable-next-line no-unused-vars
   const getHint = () => {
     const hints = getNextHintAll(problem, solution)
 
@@ -298,7 +285,7 @@ export default function Zone({ onSolve, zoneId, content }) {
           </g>
         </svg>
       </div>
-      <button onClick={getHint}>getHint</button>
+      {/*<button onClick={getHint}>getHint</button>*/}
     </div>
   )
 }

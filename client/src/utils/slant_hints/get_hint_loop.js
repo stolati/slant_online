@@ -186,8 +186,8 @@ const extractIncoherenceInSolutionGroups = (solutionGroups, solution) => {
     return numA === numB
   }
 
-  solution.map((line, y) => {
-    line.map((cell, x) => {
+  solution.forEach((line, y) => {
+    line.forEach((cell, x) => {
       if (getPos(x, y) !== ' ') return
 
       if (isProblematic(x, y, '/')) {

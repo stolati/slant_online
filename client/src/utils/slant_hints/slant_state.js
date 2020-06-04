@@ -1,18 +1,15 @@
 import { getLoopSolution } from './loops'
 import { is_connected_side } from './is_connected_side'
-import { getNextHintAll } from './get_next_hint'
 import { range } from '../../utils'
-import React from 'react'
 import { extractProblemState } from './problemState'
 
 const DEFAULT_STATE = {
-   height : 0,
-   width : 0,
-   problem : [],
-   solution : [],
-   solved : false,
+  height: 0,
+  width: 0,
+  problem: [],
+  solution: [],
+  solved: false
 }
-
 
 
 export default class SlantState { //Should be immutable
@@ -42,7 +39,7 @@ export default class SlantState { //Should be immutable
       width: this.width,
       problem: this.problem, //Clues
       solution: this.solution, //Grid
-      solved: this.solved,
+      solved: this.solved
     }
   }
 
@@ -60,16 +57,16 @@ export default class SlantState { //Should be immutable
       y,
       value: this.__getGrid(x, y),
       isConnectedSide: this.isConnectedSide[y][x],
-      isInLoop: this.loopSolution[y][x],
+      isInLoop: this.loopSolution[y][x]
     }
   }
 
-  getHintInfo(x, y){
-    return{
+  getHintInfo(x, y) {
+    return {
       x,
       y,
       value: this.__getHint(x, y),
-      hintState: extractProblemState(this.problem, this.solution, x, y),
+      hintState: extractProblemState(this.problem, this.solution, x, y)
     }
   }
 
@@ -83,10 +80,10 @@ export default class SlantState { //Should be immutable
       }).flat()
   }
 
-  hintMap(fct){
-    return range(this.width+1)
+  hintMap(fct) {
+    return range(this.width + 1)
       .map((_, x) => {
-        return range(this.height+1)
+        return range(this.height + 1)
           .map((_, y) => {
             return fct(this.getHintInfo(x, y))
           })

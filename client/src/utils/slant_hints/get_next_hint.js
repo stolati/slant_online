@@ -1,18 +1,7 @@
-// let getPos = (x, y, solution) => {
-//   let solY = solution[y]
-//   if (solY === undefined) return ' '
-//   let solYX = solution[y][x]
-//   if (solYX === undefined) return ' '
-//
-//   if (res[y][x] === false) {
-//     return ' '
-//   }
-//   return solYX
-// }
 
 import stringify from 'json-stable-stringify'
-import { matrixMap, range } from '../../utils'
-import { getLoopGroupHints, getLoopGroupSolution } from './get_hint_loop'
+import { range } from '../../utils'
+import { getLoopGroupHints } from './get_hint_loop'
 
 // here instead of \\, we're going to use L
 
@@ -150,11 +139,11 @@ const parse_rule = (rule) => {
 
   //Check that the lines alternates
   let previousIsNumber = !lines[0].isNumberLine
-  lines.map((e, i) => {
+  lines.forEach((e, i) => {
     let expectedIsNumber = !previousIsNumber
     console.assert(
       e.isNumberLine === expectedIsNumber,
-      `Is number failed for ${rule} on ${e.content}`
+      `Is number failed for ${rule} on ${e.content}`,
     )
     previousIsNumber = expectedIsNumber
   })
@@ -200,20 +189,9 @@ const print_rule = (rule) => {
     res_args.push(css)
   }
 
-  const add = (elem, color) => {
-    if (elem.length == 1) elem = `${elem} `
-    res_str.push(`%c${elem}`)
-    res_args.push(`color: ${color}`)
-  }
-
-  const addDash = () => add('--', 'black')
-  const addPipe = () => add('||', 'black')
-  const addElem = (e) => add(`${e}`, 'red')
-  const addNewLine = () => res_str.push('\n')
-
-  zip(rule.slash, rule.num).map(([slash, num]) => {
+  zip(rule.slash, rule.num).forEach(([slash, num]) => {
     //Slash part
-    slash.map((c, ci) => {
+    slash.forEach((c, ci) => {
       if (ci !== 0) put('|')
       put(c)
     })
@@ -221,7 +199,7 @@ const print_rule = (rule) => {
 
     //Num part
     if (num !== undefined) {
-      num.map((c) => {
+      num.forEach((c) => {
         put('-')
         put(c)
       })
