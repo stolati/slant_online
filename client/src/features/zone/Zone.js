@@ -40,7 +40,7 @@ const getNumberColor = (problem, solution, posX, posY) => {
 }
 
 
-export function Zone(props) {
+export default function Zone(props) {
   const dispatch = useDispatch()
   let { zoneId } = useParams()
   const content = useSelector(selectZone(zoneId))

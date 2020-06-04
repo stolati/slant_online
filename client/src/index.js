@@ -8,7 +8,8 @@ import * as serviceWorker from './serviceWorker'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 
 import { MainMap } from './features/mainMap/MainMap'
-import { Zone } from './features/zone/Zone'
+import Zone from './features/zone/Zone'
+import Tutorial from './Tutorial'
 
 ReactDOM.render(
   <Provider store={store}>
@@ -17,6 +18,8 @@ ReactDOM.render(
         <Route exact path="/" component={App} />
         <Route exact path="/main_map" component={MainMap} />
         <Route exact path="/zone/:zoneId" component={Zone} />
+        <Route exact path="/tutorial/:step" component={Tutorial} />
+        <Route exact path="/tutorial/:step/:num" component={Tutorial} />
       </Switch>
     </Router>
   </Provider>,
