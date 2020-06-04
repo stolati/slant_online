@@ -7,7 +7,7 @@ import {
   leftClick,
   rightClick,
   pushAnswer,
-  specifyState,
+  specifyState
 } from './zoneSlice'
 import styles from './Zone.module.css'
 import {
@@ -16,31 +16,33 @@ import {
   getElementBox,
   throttle,
   postphoneAsync,
-  postphoneAsyncWithTime,
+  postphoneAsyncWithTime
 } from '../../utils'
 import { getLoopSolution } from '../../utils/slant_hints/loops'
 import { getNextHintAll } from '../../utils/slant_hints/get_next_hint'
 import {
   PROBLEM_STATE,
-  extractProblemState,
+  extractProblemState
 } from '../../utils/slant_hints/problemState'
 import { socket } from '../../utils/socket'
-import {is_connected_side} from '../../utils/slant_hints/is_connected_side'
+import { is_connected_side } from '../../utils/slant_hints/is_connected_side'
+import SlantState from '../../utils/slant_hints/slant_state'
+import { GridBox, HintText, SolutionLine } from './ZoneSvg'
+import ZoneDrawingHelper from './ZoneDrawingHelper'
 
 export const NUMBER_STATE = {
   [PROBLEM_STATE.INVALID]: 'red',
   [PROBLEM_STATE.SOLVED]: 'green',
-  [PROBLEM_STATE.DEFAULT]: 'black',
+  [PROBLEM_STATE.DEFAULT]: 'black'
 }
 
-const getNumberColor = (problem, solution, posX, posY) => {
-  const hint_state = extractProblemState(problem, solution, posX, posY)
+const zoneDrawingHelper = new ZoneDrawingHelper({
+  mapBorder: 10,
+  boxSize: 10,
+  circleSize: 4,
+})
 
-  return NUMBER_STATE[hint_state]
-}
-
-
-export default function Zone({onSolve, zoneId, content}) {
+export default function Zone({ onSolve, zoneId, content }) {
   const dispatch = useDispatch()
   const contentPresent = !!content
 
@@ -90,28 +92,23 @@ export default function Zone({onSolve, zoneId, content}) {
     })
   }, [dispatch, setStateOtherMouse, zoneId])
 
-  let { height, width, problem, solution, solved } = content || {
-    height: 0,
-    width: 0,
-    problem: [],
-    solution: [],
-    solved: false,
-  }
+  const slantState = new SlantState(content)
+
+  let { height, width, problem, solution, solved } = slantState.toStaticState()
 
   let isFull = !solution.some((line) => line.some((cell) => cell === ' '))
   if (!contentPresent) {
     isFull = false
   }
 
-  let loopSolution = getLoopSolution(solution)
-  let isConnectedSide = is_connected_side(solution)
-
   const B = 10 // Border every sides
   const M = 10 // View box multiplication
-  const CS = 4 // circle size
 
-  let viewBoxWidth = width * M + B + B
-  let viewBoxHeight = height * M + B + B
+  const viewBoxSize = zoneDrawingHelper.getViewBox(width, height)
+  // let viewBoxWidth = width * M + B + B
+  // let viewBoxHeight = height * M + B + B
+  let viewBoxWidth = viewBoxSize.width
+  let viewBoxHeight = viewBoxSize.height
 
   const viewBox = `0 0 ${viewBoxWidth} ${viewBoxHeight}`
 
@@ -177,7 +174,7 @@ export default function Zone({onSolve, zoneId, content}) {
 
     const toSend = {
       x: ((e.pageX - divElementBox.left) * 1.0) / divElementBox.width,
-      y: ((e.pageY - divElementBox.top) * 1.0) / divElementBox.height,
+      y: ((e.pageY - divElementBox.top) * 1.0) / divElementBox.height
     }
 
     sendMouseMoveEvent(toSend)
@@ -186,12 +183,12 @@ export default function Zone({onSolve, zoneId, content}) {
   const onMouseOut = useCallback((e) => {
     sendMouseMoveEvent({
       x: null,
-      y: null,
+      y: null
     })
   })
 
   const throttledOnMouseMove = useCallback(throttle(onMouseMove, 500), [
-    onMouseMove,
+    onMouseMove
   ])
 
   const getHint = () => {
@@ -232,130 +229,26 @@ export default function Zone({onSolve, zoneId, content}) {
             className={styles.rectBackground}
           />
           <g>
-            {range(width).map((_, x) => {
-              return range(height)
-                .map((_, y) => {
-                  let pos = `${x},${y}`
-
-                  return (
-                    <rect
-                      x={x * M + B}
-                      y={y * M + B}
-                      width={M}
-                      height={M}
-                      className={styles.rectFloor}
-                      key={pos}
-                    />
-                  )
-                })
-                .flat()
-            })}
+            {slantState.gridMap(({ x, y }) =>
+              GridBox({ x, y, zoneDrawingHelper })
+            )}
           </g>
 
           <g>
-            {range(width)
-              .map((_, x) => {
-                return range(height)
-                  .map((_, y) => {
-                    let pos = `${x},${y}`
-
-                    let curStyle = styles.line;
-                    if(isConnectedSide[y][x]) {
-                      curStyle = styles.isConnectedSide;
-                    }
-                    if(loopSolution[y][x]){
-                      curStyle = styles.lineError;
-                    }
-                    let sol_content = solution[y][x]
-
-                    if (sol_content === '/') {
-                      return (
-                        <line
-                          x1={x * M + B + M}
-                          y1={y * M + B}
-                          x2={x * M + B}
-                          y2={y * M + B + M}
-                          className={curStyle}
-                          key={pos}
-                        />
-                      )
-                    }
-
-                    if (sol_content === '\\') {
-                      return (
-                        <line
-                          x1={x * M + B}
-                          y1={y * M + B}
-                          x2={x * M + B + M}
-                          y2={y * M + B + M}
-                          className={curStyle}
-                          key={pos}
-                        />
-                      )
-                    }
-
-                    return null
-                  })
-                  .flat()
-              })
-              .flat()}
+            {
+              slantState.gridMap(({ x, y, value, isConnectedSide, isInLoop }) =>
+                SolutionLine({ x, y, value, isConnectedSide, isInLoop, zoneDrawingHelper })
+              ).flat()
+            }
           </g>
 
           <g>
-            {range(width + 1).map((_, x) => {
-              return range(height + 1)
-                .map((_, y) => {
-                  let pos = `${x},${y}`
-                  if (problem[y][x] === ' ') {
-                    return null
-                  }
-
-                  let numberColor = getNumberColor(problem, solution, x, y)
-
-                  return (
-                    <circle
-                      cx={x * M + B}
-                      cy={y * M + B}
-                      r={CS / 1.5}
-                      stroke={numberColor}
-                      strokeWidth="1"
-                      fill="grey"
-                      key={pos}
-                    />
-                  )
-                })
-                .flat()
-            })}
+            {
+              slantState.hintMap(({ x, y, value, hintState }) =>
+                HintText({x, y, value, hintState, zoneDrawingHelper})
+              ).flat()
+            }
           </g>
-
-          <g>
-            {range(width + 1).map((_, x) => {
-              return range(height + 1)
-                .map((_, y) => {
-                  let pos = `${x},${y}`
-                  if (problem[y][x] === ' ') {
-                    return null
-                  }
-
-                  let numberColor = getNumberColor(problem, solution, x, y)
-
-                  return (
-                    <text
-                      x={x * M + B - CS / 2 + 1 - 0.25}
-                      y={y * M + B + CS / 2 - 1 + 0.5}
-                      className={styles.small_text}
-                      key={pos}
-                      draggable="false"
-                      fill={numberColor}>
-                      {problem[y][x]}
-                    </text>
-                  )
-                })
-                .flat()
-            })}
-          </g>
-
-          <g></g>
 
           <g>
             {Object.entries(stateOtherMouse).map(([key, value]) => {
@@ -376,12 +269,12 @@ export default function Zone({onSolve, zoneId, content}) {
                 style: {
                   transform: `translate(${transformX}px, ${transformY}px)`,
                   position: 'absolute',
-                  transition: 'transform .5s ease', //Seems to be the best one
+                  transition: 'transform .5s ease' //Seems to be the best one
                   //                        transition: 'transform .5s linear',
                   //                        transition: 'transform .5s ease-in',
                   //                        transition: 'transform .5s ease-out',
                   //                        transition: 'transform .5s ease-in-out',
-                },
+                }
               }
 
               return (

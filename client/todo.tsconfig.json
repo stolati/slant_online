@@ -1,0 +1,13 @@
+# Was trying to do : https://www.typescriptlang.org/docs/handbook/react-&-webpack.html
+
+{
+  "compilerOptions": {
+    "include": "src/**",
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "target": "es6",
+    "jsx": "react"
+  }
+}
