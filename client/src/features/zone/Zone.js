@@ -25,6 +25,7 @@ import {
   extractProblemState,
 } from '../../utils/slant_hints/problemState'
 import { socket } from '../../utils/socket'
+import {is_connected_side} from '../../utils/slant_hints/is_connected_side'
 
 export const NUMBER_STATE = {
   [PROBLEM_STATE.INVALID]: 'red',
@@ -37,6 +38,7 @@ const getNumberColor = (problem, solution, posX, posY) => {
 
   return NUMBER_STATE[hint_state]
 }
+
 
 export function Zone(props) {
   const dispatch = useDispatch()
@@ -104,6 +106,7 @@ export function Zone(props) {
   }
 
   let loopSolution = getLoopSolution(solution)
+  let isConnectedSide = is_connected_side(solution)
 
   const B = 10 // Border every sides
   const M = 10 // View box multiplication
@@ -258,9 +261,13 @@ export function Zone(props) {
                   .map((_, y) => {
                     let pos = `${x},${y}`
 
-                    let curStyle = loopSolution[y][x]
-                      ? styles.lineError
-                      : styles.line
+                    let curStyle = styles.line;
+                    if(isConnectedSide[y][x]) {
+                      curStyle = styles.isConnectedSide;
+                    }
+                    if(loopSolution[y][x]){
+                      curStyle = styles.lineError;
+                    }
                     let sol_content = solution[y][x]
 
                     if (sol_content === '/') {

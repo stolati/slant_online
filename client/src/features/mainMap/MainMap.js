@@ -2,6 +2,8 @@ import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { fetchMainMap, selectMainMap } from './mainMapSlice.js'
 import { Link } from 'react-router-dom'
+import { MapInteractionCSS } from 'react-map-interaction'
+
 
 import styles from './MainMap.module.css'
 
@@ -32,7 +34,11 @@ export function MainMap() {
     <div className={styles.main}>
       <h1>World map</h1>
 
-      <div className={styles.content}>{content.map(lineFct)}</div>
+      <MapInteractionCSS>
+
+        <div className={styles.content}>{content.map(lineFct)}</div>
+
+      </MapInteractionCSS>
     </div>
   )
 }
