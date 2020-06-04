@@ -3,6 +3,10 @@ import { useSelector, useDispatch } from 'react-redux'
 import { fetchMainMap, selectMainMap } from './mainMapSlice.js'
 import { Link } from 'react-router-dom'
 import { MapInteractionCSS } from 'react-map-interaction'
+import {
+  isBrowser
+} from "react-device-detect";
+
 
 
 import styles from './MainMap.module.css'
@@ -30,15 +34,18 @@ export function MainMap() {
     </div>
   )
 
+  const divContent = <div className={styles.content}>
+    {content.map(lineFct)}
+  </div>
+
   return (
     <div className={styles.main}>
       <h1>World map</h1>
-
-      <MapInteractionCSS>
-
-        <div className={styles.content}>{content.map(lineFct)}</div>
-
-      </MapInteractionCSS>
+      {isBrowser ? (
+        <MapInteractionCSS>{divContent}</MapInteractionCSS>
+      ) : (
+        divContent)
+      }
     </div>
   )
 }
