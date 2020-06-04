@@ -1,5 +1,6 @@
 from aiohttp import web
 import sys
+import os
 
 import room
 import sio
@@ -9,7 +10,6 @@ import database_endpoint
 def p(*args):
     print(repr(args), file=sys.stdout)
     sys.stdout.flush()
-
 
 ####################
 # Websocket part
@@ -27,5 +27,8 @@ sio.attach(app, [room])
 p('stopped starting')
 
 if __name__ == '__main__':
-    p("starting main")
-    web.run_app(app, host='0.0.0.0', port=8081)
+    port = int(os.getenv('AIO_PORT', '8081'))
+    host = os.getenv('AIO_HOST', '0.0.0.0')
+
+    p(f"starting main on host: {host} port:{port}")
+    web.run_app(app, host=host, port=port)
