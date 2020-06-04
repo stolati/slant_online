@@ -40,10 +40,8 @@ const getNumberColor = (problem, solution, posX, posY) => {
 }
 
 
-export default function Zone({onSolve}) {
+export default function Zone({onSolve, zoneId, content}) {
   const dispatch = useDispatch()
-  let { zoneId } = useParams()
-  const content = useSelector(selectZone(zoneId))
   const contentPresent = !!content
 
   const sendMouseMoveEvent = (pos) => {
@@ -168,7 +166,7 @@ export default function Zone({onSolve}) {
 
   if (solved) {
     // divClassNames.push(styles.div_succeed)
-    onSolve && onSolve()
+    onSolve && setTimeout(onSolve, 0)
   }
 
   divClassNames = divClassNames.join(' ')
