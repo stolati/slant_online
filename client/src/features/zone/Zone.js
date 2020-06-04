@@ -40,7 +40,7 @@ const getNumberColor = (problem, solution, posX, posY) => {
 }
 
 
-export default function Zone(props) {
+export default function Zone({history}) {
   const dispatch = useDispatch()
   let { zoneId } = useParams()
   const content = useSelector(selectZone(zoneId))
@@ -168,7 +168,7 @@ export default function Zone(props) {
 
   if (solved) {
     divClassNames.push(styles.div_succeed)
-    setTimeout(() => props.history.push('/main_map'), 4000)
+    setTimeout(() => history.push('/main_map'), 4000)
   }
 
   divClassNames = divClassNames.join(' ')
@@ -407,7 +407,7 @@ export default function Zone(props) {
           </g>
         </svg>
       </div>
-      {/*<button onClick={getHint}>getHint</button>*/}
+      <button onClick={getHint}>getHint</button>
     </div>
   )
 }
