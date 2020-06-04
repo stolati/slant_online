@@ -18,9 +18,11 @@ export function Counter() {
   return (
     <div>
       <ReactMarkdown source={markdown} />
+
       <NavLink exact to={'/main_map'}>
         To the world map
       </NavLink>
+
     </div>
   )
 }
