@@ -1,11 +1,13 @@
+#!/usr/bin/env python3.8
 from aiohttp import web
-import sys
+import logging
 import os
+import sys
 
+import database_endpoint
 import room
 import sio
 import zone_path_endpoint
-import database_endpoint
 
 def p(*args):
     print(repr(args), file=sys.stdout)
@@ -24,11 +26,12 @@ app.add_routes(database_endpoint.routes)
 
 sio.attach(app, [room])
 
-p('stopped starting')
+logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
     port = int(os.getenv('AIO_PORT', '8081'))
     host = os.getenv('AIO_HOST', '0.0.0.0')
 
-    p(f"starting main on host: {host} port:{port}")
+    log = logging.getLogger(__name__)
+    log.info(f"starting main on host: {host} port:{port}")
     web.run_app(app, host=host, port=port)

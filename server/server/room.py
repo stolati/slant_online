@@ -1,27 +1,22 @@
-import socketio
 import sys
 from sio import get_sio
+import logging
 
 sio = get_sio()
 
-
-def p(*args):
-    print(repr(args), file=sys.stdout)
-    sys.stdout.flush()
-
-
 zone_usage = {}
+log = logging.getLogger(__name__)
 
 
 @sio.event
 def connect(sid, environ):
-    p('connect ', sid)
+    log.debug('connect %s', sid)
     sio.enter_room(sid, 'all')
 
 
 @sio.event
 async def disconnect(sid):
-    p('disconnect ', sid)
+    log.debug('disconnect %s', sid)
     sio.leave_room(sid, 'all')
     await leaving_zone_room(sid)
 
@@ -56,25 +51,25 @@ async def get_zone_room(sid):
 
 @sio.event
 async def set_zone(sid, data):
-    p('set_zone', sid, data)
+    log.debug('set_zone %s %s', sid, data)
     await entering_zone_room(sid, data['zone_path'])
 
 
 @sio.event
 async def exit_zone(sid, data):
-    p('exit_zone', sid)
+    log.debug('exit_zone %s', sid)
     await leaving_zone_room(sid)
 
 
 @sio.event
 async def mouse_move(sid, data):
-    p('mouseMove', sid, data)
+    log.debug('mouseMove %s %s', sid, data)
 
     data['sid'] = sid
 
     room_name = await get_zone_room(sid)
 
-    p(sio.rooms(sid), room_name)
+    log.debug('moveMove for room : %s %s', sio.rooms(sid), room_name)
 
     await sio.emit('mouse_move', data, room=room_name, skip_sid=sid)
 
@@ -86,7 +81,7 @@ async def get_zones_usage(sid):
 
 @sio.event
 async def mouse_click(sid, data):
-    p('mouse_click', sid, data)
+    log.debug('mouse_click %s %s', sid, data)
 
     data['sid'] = sid
     room_name = await get_zone_room(sid)
