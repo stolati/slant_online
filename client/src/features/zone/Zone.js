@@ -40,7 +40,7 @@ const getNumberColor = (problem, solution, posX, posY) => {
 }
 
 
-export default function Zone({history}) {
+export default function Zone({onSolve}) {
   const dispatch = useDispatch()
   let { zoneId } = useParams()
   const content = useSelector(selectZone(zoneId))
@@ -167,8 +167,8 @@ export default function Zone({history}) {
   let divClassNames = [styles.wrappingDiv]
 
   if (solved) {
-    divClassNames.push(styles.div_succeed)
-    setTimeout(() => history.push('/main_map'), 4000)
+    // divClassNames.push(styles.div_succeed)
+    onSolve && onSolve()
   }
 
   divClassNames = divClassNames.join(' ')

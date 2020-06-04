@@ -1,14 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Zone from './Zone'
-import {
-  selectZone,
-} from './zoneSlice'
-import { useSelector } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import styles from './Zone.module.css'
 
 export default function ZonePlayWrapper({history}){
-  return <div>
-    <Zone history={history}/>
+
+  const [solved, setSolved] = useState(false)
+
+  let onSolve = () => {
+    setSolved(true);
+    setTimeout(() => history.push('/main_map'), 4000)
+  }
+
+  let className = [];
+  if(solved){
+    className.push(styles.div_succeed)
+  }
+
+  return <div className={className.join(' ')}>
+    <Zone onSolve={onSolve}/>
   </div>
 }
 
