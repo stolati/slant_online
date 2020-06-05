@@ -28,7 +28,7 @@ const zoneDrawingHelper = new ZoneDrawingHelper({
   circleSize: 4,
 })
 
-export default function Zone({ onSolve, zoneId, content }) {
+export default function Zone({ onSolve, zoneId, content, onClick, onUserEvent }) {
   const dispatch = useDispatch()
   const contentPresent = !!content
 
@@ -135,9 +135,7 @@ export default function Zone({ onSolve, zoneId, content }) {
 
     sendMouseClickEvent({ ...posAbs, left })
 
-    if (left) {
-      dispatch(leftClick({ ...posAbs, zoneId }))
-    } else dispatch(rightClick({ ...posAbs, zoneId }))
+    onClick({ ...posAbs, content, zoneId, isLeft: left, isRight: !left })
 
     return false
   }
