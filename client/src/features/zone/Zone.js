@@ -1,12 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import {
-  fetchZone,
-  leftClick,
-  rightClick,
-  pushAnswer,
-  specifyState,
-} from './zoneSlice'
 import styles from './Zone.module.css'
 import { getRelativeCoordinates, getElementBox, throttle } from '../../utils'
 import { getNextHintAll } from '../../utils/slant_hints/get_next_hint'
@@ -28,7 +21,7 @@ const zoneDrawingHelper = new ZoneDrawingHelper({
   circleSize: 4,
 })
 
-export default function Zone({ onSolve, zoneId, content, onClick, onUserEvent }) {
+export default function Zone({ onSolve, zoneId, content, onAction, solution, onActions}) {
   const dispatch = useDispatch()
   const contentPresent = !!content
 
@@ -50,12 +43,6 @@ export default function Zone({ onSolve, zoneId, content, onClick, onUserEvent })
   //   const [stateDivBox, setStateDivBox] = useState({top:0, left: 0, width: 1, height:1});
 
   useEffect(() => {
-    if (!contentPresent) {
-      dispatch(fetchZone(zoneId))
-    }
-  }, [zoneId, contentPresent])
-
-  useEffect(() => {
     const cleanMethod = socket.whenConnected(sendSetZoneEvent)
 
     return () => {
@@ -72,15 +59,16 @@ export default function Zone({ onSolve, zoneId, content, onClick, onUserEvent })
 
     socket.on('mouse_click', (data) => {
       let { x, y, left } = data
-      if (left) {
-        dispatch(leftClick({ x, y, zoneId }))
-      } else dispatch(rightClick({ x, y, zoneId }))
+      onAction({ x, y, action: (left ? 'clickLeft' : 'clickRight')})
     })
   }, [dispatch, setStateOtherMouse, zoneId])
 
-  const slantState = new SlantState(content)
+  const slantState = new SlantState({...content, solution})
 
-  let { height, width, problem, solution, solved } = slantState.toStaticState()
+  let slantStaticState = slantState.toStaticState()
+  //TODO get rid of the usage of thoses (use ZoneDrawingHelper or slantState)
+  let { height, width, problem, solved } = slantStaticState
+  let solutionStaticState = slantStaticState.solution
 
   let isFull = !solution.some((line) => line.some((cell) => cell === ' '))
   if (!contentPresent) {
@@ -135,7 +123,7 @@ export default function Zone({ onSolve, zoneId, content, onClick, onUserEvent })
 
     sendMouseClickEvent({ ...posAbs, left })
 
-    onClick({ ...posAbs, content, zoneId, isLeft: left, isRight: !left })
+    onAction({ ...posAbs, content, zoneId, action: (left ? 'clickLeft' : 'clickRight')})
 
     return false
   }
@@ -178,23 +166,18 @@ export default function Zone({ onSolve, zoneId, content, onClick, onUserEvent })
   // eslint-disable-next-line no-unused-vars
   const getHint = () => {
     const hints = getNextHintAll(problem, solution)
+    const actions = hints.map(({x, y, s}) => ({x, y, action: 'set', value: s}))
 
-    hints.forEach((h) => {
-      dispatch(specifyState({ zoneId, ...h }))
-    })
-
-    // if (hints.length !== 0) {
-    //   getHint()
-    // }
+    setTimeout(()=>onActions(actions))
   }
 
   if (!contentPresent) {
     return <div>Empty for now</div>
   }
 
-  if (isFull) {
-    dispatch(pushAnswer({ zoneId, solution }))
-  }
+  // if (isFull) {
+  //   dispatch(pushAnswer({ zoneId, solution }))
+  // }
 
   return (
     <div>
@@ -283,7 +266,7 @@ export default function Zone({ onSolve, zoneId, content, onClick, onUserEvent })
           </g>
         </svg>
       </div>
-      {/*<button onClick={getHint}>getHint</button>*/}
+      <button onClick={getHint}>getHint</button>
     </div>
   )
 }

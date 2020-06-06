@@ -210,7 +210,8 @@ const print_rule = (rule) => {
 
   res_args.unshift(res_str.join(''))
 
-  console.log(...res_args)
+  //Print all the cases
+  // console.log(...res_args)
 }
 
 // Rotate 1/4 the rule clock-wise
