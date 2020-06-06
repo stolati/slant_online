@@ -91,6 +91,10 @@ export function ZoneContextProvider({ zoneIdInitial, children }) {
   const onAction = (action) => onActions([action])
 
   const onActions = (actions) => {
+    //Block any action when state success is already done.
+    if(isSuccess) {
+      return
+    }
     const solutionCopy = copySolution(solution)
     actions.forEach(a => oneAction(a, solutionCopy))
     setSolution(solutionCopy)
