@@ -8,6 +8,7 @@ import { socket } from '../../utils/socket'
 import SlantState from '../../utils/slant_hints/slant_state'
 import { GridBox, HintText, SolutionLine } from './ZoneSvg'
 import ZoneDrawingHelper from './ZoneDrawingHelper'
+import { HiddenAction } from '../../component/hiddenAction'
 
 export const NUMBER_STATE = {
   [PROBLEM_STATE.INVALID]: 'red',
@@ -21,7 +22,9 @@ const zoneDrawingHelper = new ZoneDrawingHelper({
   circleSize: 4,
 })
 
-export default function Zone({ onSolve, zoneId, content, onAction, solution, onActions}) {
+//TODO extract the socketio feature to another class
+//TODO bug when activate/deactivate socket
+export default function Zone({ onSolve, zoneId, content, onAction, solution, onActions, socketIoActivated}) {
   const dispatch = useDispatch()
   const contentPresent = !!content
 
@@ -43,15 +46,21 @@ export default function Zone({ onSolve, zoneId, content, onAction, solution, onA
   //   const [stateDivBox, setStateDivBox] = useState({top:0, left: 0, width: 1, height:1});
 
   useEffect(() => {
+    if(!socketIoActivated){
+      return
+    }
     const cleanMethod = socket.whenConnected(sendSetZoneEvent)
 
     return () => {
       sendLeaveZoneEvent()
       cleanMethod()
     }
-  }, [zoneId])
+  }, [zoneId, socketIoActivated])
 
   useEffect(() => {
+    if(!socketIoActivated){
+      return
+    }
     socket.on('mouse_move', (data) => {
       const { x, y, sid } = data
       setStateOtherMouse({ [sid]: { x, y } })
@@ -61,7 +70,7 @@ export default function Zone({ onSolve, zoneId, content, onAction, solution, onA
       let { x, y, left } = data
       onAction({ x, y, action: (left ? 'clickLeft' : 'clickRight')})
     })
-  }, [dispatch, setStateOtherMouse, zoneId])
+  }, [dispatch, setStateOtherMouse, zoneId, socketIoActivated])
 
   const slantState = new SlantState({...content, solution})
 
@@ -121,7 +130,8 @@ export default function Zone({ onSolve, zoneId, content, onAction, solution, onA
       y: Math.floor(posInField.y / M),
     }
 
-    sendMouseClickEvent({ ...posAbs, left })
+    if(!socketIoActivated)
+      sendMouseClickEvent({ ...posAbs, left })
 
     onAction({ ...posAbs, content, zoneId, action: (left ? 'clickLeft' : 'clickRight')})
 
@@ -141,6 +151,8 @@ export default function Zone({ onSolve, zoneId, content, onAction, solution, onA
   divClassNames = divClassNames.join(' ')
 
   const onMouseMove = useCallback((e) => {
+    if(!socketIoActivated)
+      return
     const divElementBox = getElementBox(e.target)
     //            setStateDivBox(divElementBox);
 
@@ -153,6 +165,8 @@ export default function Zone({ onSolve, zoneId, content, onAction, solution, onA
   })
 
   const onMouseOut = useCallback((e) => {
+    if(!socketIoActivated)
+      return
     sendMouseMoveEvent({
       x: null,
       y: null,
@@ -266,7 +280,9 @@ export default function Zone({ onSolve, zoneId, content, onAction, solution, onA
           </g>
         </svg>
       </div>
-      <button onClick={getHint}>getHint</button>
+      <HiddenAction>
+        <button onClick={getHint}>getHint</button>
+      </HiddenAction>
     </div>
   )
 }

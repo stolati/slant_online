@@ -3,11 +3,28 @@ import Zone from './Zone'
 import styles from './Zone.module.css'
 import { useParams } from 'react-router-dom'
 import { ZoneContext, ZoneContextProvider } from './ZoneContext'
+import { HiddenAction } from '../../component/hiddenAction'
+
+
+function checkBoxState([activated, setActivated], label=null, props={}){
+  const onChange = (e)=>setActivated(e.target.checked)
+  // const onChange = (e)=>setActivated(!activated)
+
+  const dom = <label>
+    {label}
+    <input type="checkbox" name="socketIoActivated" checked={activated} onChange={onChange} {...props} />
+  </label>
+
+  return [activated, setActivated, dom]
+}
+
 
 export default function ZonePlayWrapper({ history }) {
   let { zoneId } = useParams()
 
   const [solved, setSolved] = useState(false)
+
+  const [sockActivated, _, sockDom] = checkBoxState(useState(true), "Socket IO activated")
 
   let onSolve = () => {
     setSolved(true)
@@ -20,9 +37,11 @@ export default function ZonePlayWrapper({ history }) {
     className.push(styles.div_succeed)
   }
 
-
-
   return <div className={className.join(' ')}>
+
+    <HiddenAction>
+      {sockDom}
+    </HiddenAction>
 
     <ZoneContextProvider zoneIdInitial={zoneId}>
       <ZoneContext.Consumer>
@@ -35,7 +54,7 @@ export default function ZonePlayWrapper({ history }) {
             if(!value.isLoaded){
               return 'loading ...'
             } else {
-              return <Zone onSolve={onSolve} {...value} />
+              return <Zone onSolve={onSolve} socketIoActivated={sockActivated} {...value} />
             }
           }
         }
