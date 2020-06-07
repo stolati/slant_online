@@ -47,6 +47,10 @@ export const getLoopSolution = (solution) => {
     let v8 = getPos(x, y + 1)
     let v9 = getPos(x + 1, y + 1)
 
+    if(v5 == ' '){
+      return [[], []]
+    }
+
     if (v5 === '/') {
       return [
         [
@@ -76,6 +80,9 @@ export const getLoopSolution = (solution) => {
         ].filter((e) => e !== null),
       ].filter((e) => e.length !== 0)
     }
+
+    console.error(v5)
+    return [[],[]]
   }
 
   let processElem = (x, y) => {
@@ -83,6 +90,7 @@ export const getLoopSolution = (solution) => {
     if (e === ' ') return
     let linked = getLinked(x, y)
 
+    console.log(linked)
     if (linked.length === 2) {
       return
     }

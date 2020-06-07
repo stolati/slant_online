@@ -1,46 +1,65 @@
+
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { range } from '../../utils'
+import { Dictionary } from '@reduxjs/toolkit'
 
 export const ZoneContext = React.createContext({})
 
+enum SolutionValue {
+  EMPTY = ' ',
+  SLICE_LEFT = '\\',
+  SLICE_RIGHT = '/',
+}
 
-const rotateLeftClick = (e) =>
-  ({
-    ' ': '\\',
-    '\\': '/',
-    '/': ' '
-  }[e])
+const LEFT_ROTATION: Dictionary<SolutionValue> = {
+  [SolutionValue.EMPTY]: SolutionValue.SLICE_LEFT,
+  [SolutionValue.SLICE_LEFT]: SolutionValue.SLICE_RIGHT,
+  [SolutionValue.SLICE_RIGHT]: SolutionValue.EMPTY,
+}
 
-const rotateRightClick = (e) =>
-  ({
-    ' ': '/',
-    '/': '\\',
-    '\\': ' '
-  }[e])
+const RIGHT_ROTATION: Dictionary<SolutionValue> = {
+  [SolutionValue.EMPTY]: SolutionValue.SLICE_RIGHT,
+  [SolutionValue.SLICE_RIGHT]: SolutionValue.SLICE_LEFT,
+  [SolutionValue.SLICE_LEFT]: SolutionValue.EMPTY,
+}
 
 
-const oneAction = ({ x, y, action, value }, solution) => {
+type Action = {x : number, y: number, action: string, value: SolutionValue | undefined }
+type Solution  = SolutionValue[][]
+
+const oneAction = ({ x, y, action, value }: Action, solution: any) => {
   switch (action) {
     case 'set':
       solution[y][x] = value
       break
     case 'clickLeft':
-      solution[y][x] = rotateLeftClick(solution[y][x])
+      solution[y][x] = LEFT_ROTATION[solution[y][x]]
       break
     case 'clickRight':
-      solution[y][x] = rotateRightClick(solution[y][x])
+      solution[y][x] = RIGHT_ROTATION[solution[y][x]]
       break
     default:
       throw action
   }
 }
 
-const copySolution = (solution) => solution.map(l => l.slice())
+const copySolution = (solution: Solution) => solution.map(l => l.slice())
+const emptySolution = (height: number, width: number): Solution =>
+  range(height).map((_, y) =>
+    range(width).map((_, x) => SolutionValue.EMPTY))
+
+const isSolutionFull = (solution: Solution) =>
+  !solution.some((line) =>
+    line.some((cell) => cell === SolutionValue.EMPTY))
 
 
-export function ZoneContextProvider({ zoneIdInitial, children }) {
-  const [zoneId, setZoneId] = useState(zoneIdInitial)
+interface ZoneContextProviderParams {
+  zoneIdInitial: string,
+  children: any
+}
+export function ZoneContextProvider({ zoneIdInitial, children }: ZoneContextProviderParams) {
+  const zoneId = zoneIdInitial //We never modify it
 
   const [isLoaded, setLoaded] = useState(false)
   const [isFull, setIsFull] = useState(false)
@@ -53,14 +72,13 @@ export function ZoneContextProvider({ zoneIdInitial, children }) {
     solved: false
   })
 
-  const [solution, setSolution] = useState([])
+  const [solution, setSolution] = useState([] as Solution)
 
   useEffect(() => {
     const fetch = async () => {
       const response = await axios.get(`/api/zones/${zoneId}`)
 
-      setSolution(range(response.data.height).map((_, y) =>
-        range(response.data.width).map((_, x) => ' ')))
+      setSolution(emptySolution(response.data.height, response.data.width))
       setContent({ ...response.data, solution })
       setLoaded(true)
     }
@@ -88,9 +106,9 @@ export function ZoneContextProvider({ zoneIdInitial, children }) {
     post()
   }, [isFull])
 
-  const onAction = (action) => onActions([action])
+  const onAction = (action: Action) => onActions([action])
 
-  const onActions = (actions) => {
+  const onActions = (actions: Action[]) => {
     //Block any action when state success is already done.
     if(isSuccess) {
       return
@@ -99,8 +117,7 @@ export function ZoneContextProvider({ zoneIdInitial, children }) {
     actions.forEach(a => oneAction(a, solutionCopy))
     setSolution(solutionCopy)
 
-    const isFull = !solutionCopy.some((line) => line.some((cell) => cell === ' '))
-    setIsFull(isFull)
+    setIsFull(isSolutionFull(solutionCopy))
   }
 
 

@@ -36,3 +36,10 @@ Then after all that, I guess its going to be done. Maybe send an email to Simon 
 
 - Game in other formats :
   - http://manpages.ubuntu.com/manpages/precise/man6/slant.6.html
+
+
+# Next steps :
+- Filling map for the main map
+- Seiing where people are playing on the main map
+- Refresh content of 
+- Jenkins ?
